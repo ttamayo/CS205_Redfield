@@ -1,7 +1,7 @@
-@import "{{ site.theme }}";
 # CS205 Final project
-Florian Hase, Hannah Sim, and Teresa Tamayo
 # Implementation and parallelization of Redfield equations
+
+Florian Hase, Hannah Sim, and Teresa Tamayo
 
 In this project, we are going to implement and parallelize a 
 method for computing the time evolution of the density matrix in an open quantum, 
