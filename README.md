@@ -15,9 +15,7 @@ the class.
 
 The evolution of small systems is usually influenced by the interaction of the surroundings, given that in general is impossible to isolate it. Hence, the dynamics of a quantum system depends substantially on the interaction of the external environment. However, we are usually unable to keep track the evolution of the complete systems and their surroundings. In this situation, we use equations that account the influence of the surroundings on the systems, but not keeping track the environment evolutions. These ubiquitous phenomena determine the physics and chemistry in diverse fields, one of the most important is the exciton transfer dynamics[1]. One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. 
 
-<html>
 <head>
-<title>LaTeX4Web 1.4 OUTPUT</title>
 <style type="text/css">
 <!--
  body {color: black;  background:"#FFCC99";  }
@@ -39,7 +37,6 @@ The evolution of small systems is usually influenced by the interaction of the s
 </head>
 <body>
 (d)/(dt) <font face=symbol>r</font><sub>s</sub>(t) = <font face=symbol>-</font>i [H<sub>S</sub>m <font face=symbol>r</font><sub>s</sub>(t)] + L(<font face=symbol>r</font>(p<sub>s</sub>(t))</body>
-</html>
 
 The first term takes into account the evolution of the system without the presence of the environment, 
 while the second keeps track on the environmental influence of the system.
