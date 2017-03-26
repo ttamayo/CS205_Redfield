@@ -15,11 +15,37 @@ the class.
 
 The evolution of small systems is usually influenced by the interaction of the surroundings, given that in general is impossible to isolate it. Hence, the dynamics of a quantum system depends substantially on the interaction of the external environment. However, we are usually unable to keep track the evolution of the complete systems and their surroundings. In this situation, we use equations that account the influence of the surroundings on the systems, but not keeping track the environment evolutions. These ubiquitous phenomena determine the physics and chemistry in diverse fields, one of the most important is the exciton transfer dynamics[1]. One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. 
 
-$\frac{d}{dt} \rho_s(t) = -i [H_{S}m \rho_s(t)] + L(\rho(p_s(t))$
+<html>
+<head>
+<title>LaTeX4Web 1.4 OUTPUT</title>
+<style type="text/css">
+<!--
+ body {color: black;  background:"#FFCC99";  }
+ div.p { margin-top: 7pt;}
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.norm {line-height:normal;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td.sqrt {border-top:2 solid black;
+          border-left:2 solid black;
+          border-bottom:none;
+          border-right:none;}
+ table.sqrt {border-top:2 solid black;
+             border-left:2 solid black;
+             border-bottom:none;
+             border-right:none;}
+-->
+</style>
+</head>
+<body>
+(d)/(dt) <font face=symbol>r</font><sub>s</sub>(t) = <font face=symbol>-</font>i [H<sub>S</sub>m <font face=symbol>r</font><sub>s</sub>(t)] + L(<font face=symbol>r</font>(p<sub>s</sub>(t))</body>
+</html>
 
-The first term takes into account the evolution of the system without the presence of the environment, while the second keeps track on the environmental influence of the system.
+The first term takes into account the evolution of the system without the presence of the environment, 
+while the second keeps track on the environmental influence of the system.
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Previous implementations
+
 
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Methodology
