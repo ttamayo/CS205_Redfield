@@ -9,9 +9,9 @@ the Redfield method. This method applies to some photosynthetically active prote
 
 <center>
 <img src="files/FMO.gif" width="20">
-<\center>
+</center>
 
-**Figure:**The Fenna-Matthews-Olson (FMO) complex.
+**Figure:** The Fenna-Matthews-Olson (FMO) complex.
 Protein from green sulfur bacteria and involved in
 the excitation energy transfer from light-harvesting chlorosomes.
 
@@ -65,16 +65,16 @@ implementation of hierarchical equations of motion [6,7].
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  References
 [1] P. Rebentrost, R. Chakraborty, and A. Aspuru-Guzik, *J. Chem. Phys.*, **131**, 184102 (2009).
-<\br>
+</br>
 [2] P., M. Mohseni, I. Kassal, S. Lloyd, and A. Aspuru-Guzik, *New Journal of Physics*, **11**, 033003 (2009).
-<\br>
+</br>
 [3] V. May and O. Kühn, *Charge and Energy Transfer Dynamics in Molecular Systems*, Wiley, New York, 2004. 
-<\br>
+</br>
 [4] H. P. Breuer, and F. Petruccione, *The theory of open quantum systems*, Oxford, New York, 2010.
-<\br>
-[5] I. Kondov, U. Kleinekathöfer, and M. Schreiber, *J. Chem. Phys.*,  **114**, 1497 (2001).<\br>
-<\br>
+</br>
+[5] I. Kondov, U. Kleinekathöfer, and M. Schreiber, *J. Chem. Phys.*,  **114**, 1497 (2001).
+</br>
 [6] C. Kreisbeck and T. Kramer, *J. Phys. Chem.* **3**, 2828, (2011).
-<\br>
+</br>
 [7] C. Kreisbeck and T. Kramer "Exciton Dynamics Lab for Light-Harvesting Complexes (GPU-HEOM)," https://nanohub.org/resources/gpuheompop, (DOI: 10.4231/D3QB9V630), (2014).
-<\br>
+</br>
