@@ -8,7 +8,7 @@ method for computing the time evolution of the density matrix in an open quantum
 the Redfield method. This method applies to some photosynthetically active protein complexes[1,2]. 
 
 <center>
-<img src="files/FMO.gif" width="20">
+<img src="files/FMO.png" width="20">
 </center>
 
 **Figure:** The Fenna-Matthews-Olson (FMO) complex.
