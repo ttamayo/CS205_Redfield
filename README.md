@@ -6,7 +6,14 @@ Florian Hase, Hannah Sim, and Teresa Tamayo
 In this project, we are going to implement and parallelize a 
 method for computing the time evolution of the density matrix in an open quantum, 
 the Redfield method. This method applies to some photosynthetically active protein complexes[1,2]. 
-![](files/FMO.png)
+
+<center>
+<img src="files/FMO.gif" width="20">
+<\center>
+
+**Figure:**The Fenna-Matthews-Olson (FMO) complex.
+Protein from green sulfur bacteria and involved in
+the excitation energy transfer from light-harvesting chlorosomes.
 
 The Theoretical and Physical Chemistry group of Prof. Alan Aspuru-Guzik, 
 has wide experience in the field, where they have studied the
@@ -34,6 +41,15 @@ representation of the system.
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Previous implementations
 There are a wide variety of methods that can obtain the exciton dynamics, some of them
 departs on the Redfield equations.
+One straightforward implementation is build and diagonalize the Liouville superoperator,
+and if we use a time-independent Hamiltonian, the compuational effor scales 
+$N^6$ where $N$, is the number of the basis of vibrational states.
+This strategy can be numericall unstable in some case.
+Finally, there are other approaches where by rewritting the Redfield equation and making futher
+approximation, there is only needed matrix-matrix multiplications, hence the computational time scales
+is $N^3[5].
+
+
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Methodology
 Our first approach will be implement a serial version of the
@@ -42,14 +58,23 @@ perform the time propagations, including different numbers
 of vibrational states in the bath.
 Later, we explore different parallelization schemes
 with hybrid architectures.
-
+Finally, we will compare our results with an state-of-the-art 
+implementation of hierarchical equations of motion [6,7].
 
 
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  References
-[1] P. Rebentrost, R. Chakraborty, and A. Aspuru-Guzik, *J. Chem. Phys*, **131**, 184102 (2009).
+[1] P. Rebentrost, R. Chakraborty, and A. Aspuru-Guzik, *J. Chem. Phys.*, **131**, 184102 (2009).
+<\br>
 [2] P., M. Mohseni, I. Kassal, S. Lloyd, and A. Aspuru-Guzik, *New Journal of Physics*, **11**, 033003 (2009).
+<\br>
 [3] V. May and O. Kühn, *Charge and Energy Transfer Dynamics in Molecular Systems*, Wiley, New York, 2004. 
+<\br>
 [4] H. P. Breuer, and F. Petruccione, *The theory of open quantum systems*, Oxford, New York, 2010.
-[5] C. Kreisbeck and T. Kramer, *J. Phys. Chem.* **3**, 2828, (2011).
-[6] C. Kreisbeck and T. Kramer "Exciton Dynamics Lab for Light-Harvesting Complexes (GPU-HEOM)," https://nanohub.org/resources/gpuheompop, (DOI: 10.4231/D3QB9V630), (2014).
+<\br>
+[5] I. Kondov, U. Kleinekathöfer, and M. Schreiber, *J. Chem. Phys.*,  **114**, 1497 (2001).<\br>
+<\br>
+[6] C. Kreisbeck and T. Kramer, *J. Phys. Chem.* **3**, 2828, (2011).
+<\br>
+[7] C. Kreisbeck and T. Kramer "Exciton Dynamics Lab for Light-Harvesting Complexes (GPU-HEOM)," https://nanohub.org/resources/gpuheompop, (DOI: 10.4231/D3QB9V630), (2014).
+<\br>
