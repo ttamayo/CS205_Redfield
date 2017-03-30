@@ -43,11 +43,14 @@ There are a wide variety of methods that can obtain the exciton dynamics, some o
 departs on the Redfield equations.
 One straightforward implementation is build and diagonalize the Liouville superoperator,
 and if we use a time-independent Hamiltonian, the compuational effor scales 
-$N^6$ where $N$, is the number of the basis of vibrational states.
+<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a>
+ where <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a>, 
+is the number of the basis of vibrational states.
 This strategy can be numericall unstable in some case.
 Finally, there are other approaches where by rewritting the Redfield equation and making futher
 approximation, there is only needed matrix-matrix multiplications, hence the computational time scales
-is $N^3[5].
+is 
+<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^3" title="N^3" /></a>[5].
 
 
 
