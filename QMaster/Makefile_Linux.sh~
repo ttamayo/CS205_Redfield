@@ -1,0 +1,1 @@
+g++ -L /opt/intel/opencl-1.2-3.0.56860/include/ -I /opt/intel/opencl-1.2-3.0.56860/include/  -o QMaster-v0.2 QMaster_main.cpp -lOpenCL -llapack -lfftw3 -lgsl
