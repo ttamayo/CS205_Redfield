@@ -1,1 +1,0 @@
-# QMaster Exciton Dynamics Lab

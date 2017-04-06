@@ -29,14 +29,23 @@ However, we are usually unable to keep track the evolution of the complete syste
 In this situation, we use equations that account the influence of the surroundings on the systems, 
 but not keeping track the environment evolutions. 
 These ubiquitous phenomena determine the physics and chemistry in diverse fields, one of the most important is the exciton transfer dynamics[1],
-One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. 
+One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. The density matrix $\rho$ of the excitonic system can be time evolved according to the Liouville-von Neumann equation:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" title="\frac{d}{d t}\rho(t) = \frac{-i}{\hbar}[H_s,\rho(t)] + L (\rho(t))" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" title="\frac{d}{d t}\rho(t) = \frac{-i}{\hbar}[H_s,\rho(t)] + L (\rho(t))," /></a>
 
-The first term takes into account the evolution of the system without the presence of the environment, 
-while the second keeps track on the environmental influence of the system[3,4]. Solving this equation involves
-some matrices operations in large matrices, and parallelization in needed to have a better
+where $L$ denotes the Lindblad operator in the secular Redfield approximation. 
+
+The first term takes into account the evolution of the system without the presence of the environment, while the second keeps track on the environmental influence of the system[3,4]. 
+
+Solving this equation involves some matrices operations in large matrices, and parallelization in needed to have a better
 representation of the system.
+
+
+
+
+
+
+
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Previous implementations
 There are a wide variety of methods that can obtain the exciton dynamics, some of them
@@ -63,6 +72,15 @@ Later, we explore different parallelization schemes
 with hybrid architectures.
 Finally, we will compare our results with an state-of-the-art 
 implementation of hierarchical equations of motion [6,7].
+
+
+
+
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Python implementations
+
+To understand the secular Redfield approximation for propagating excitons under a given Hamiltonian in more detail we implemented a Python version of the Redfield method. With this implementation we were able to identify the scaling of the method and determine parts of the algorithm which are time consuming but suited for parallelization. 
+
+In particular, we found that the secular Redfield approximation can be devided into two major parts. 
 
 
 
