@@ -29,15 +29,11 @@ However, we are usually unable to keep track the evolution of the complete syste
 In this situation, we use equations that account the influence of the surroundings on the systems, 
 but not keeping track the environment evolutions. 
 These ubiquitous phenomena determine the physics and chemistry in diverse fields, one of the most important is the exciton transfer dynamics[1],
-One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. The density matrix 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\rho" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\rho" title="\rho" /></a> 
-of the excitonic system can be time evolved according to the Liouville-von Neumann equation:
+One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. The density matrix of the excitonic system can be time evolved according to the Liouville-von Neumann equation:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" title="\frac{d}{d t}\rho(t) = \frac{-i}{\hbar}[H_s,\rho(t)] + L (\rho(t))," /></a>
 
-where 
-<a href="https://www.codecogs.com/eqnedit.php?latex=L" target="_blank"><img src="https://latex.codecogs.com/gif.latex?L" title="L" /></a> 
-denotes the Lindblad operator in the secular Redfield approximation. 
+where *L* denotes the Lindblad operator in the secular Redfield approximation. 
 
 The first term takes into account the evolution of the system without the presence of the environment, while the second keeps track on the environmental influence of the system[3,4]. 
 
@@ -84,7 +80,20 @@ implementation of hierarchical equations of motion [6,7].
 
 To understand the secular Redfield approximation for propagating excitons under a given Hamiltonian in more detail we implemented a Python version of the Redfield method. With this implementation we were able to identify the scaling of the method and determine parts of the algorithm which are time consuming but suited for parallelization. 
 
-In particular, we found that the secular Redfield approximation can be devided into two major parts. 
+In particular, we found that the secular Redfield approximation can be devided into two major parts. The Lindblad operator *L* contains a set of rates which model the transition of a particular excitonic state into another excitonic state or the decay of the excitonic state into the ground state or the target state. These rates are calculated based on the excitonic eigenstates of the Hamiltonian and the spectral density, for which parameters are expected from the user. 
+
+Although computing the rates involves a number of matrix operations (diagonalizing the Hamiltonian, matrix multiplications, etc.) this is not the time limiting step for computing the exciton dynamics because rates can be calculated once at the beginning of the simulation. 
+
+Instead, we found that we should focus our parallelization strategies on the propagation of the density matrix for precomputed Hamiltonians and Lindblad operators. Propagating the system in the excitonic eigenbasis yields the additional advantage of the Hamiltonian being diagonalized, which simplifies the computation of the commutator of the Hamiltonian and the density matrix (we save one matrix multiplication). 
+
+However, the action of the Lindblad operator on the density matrix needs to be calculated at every iteration step. Even with precomputed Lindblad operator matrices, this operation requires at least four matrix multiplications, which is reflected in the scaling plots we obtained for the Python implementation of the code. We expect the algorithm to greatly benefit from a parallelization of this operation. 
+
+<center>
+<img src="files/runtimes.png" width="200"><img src="files/runtimes_loglog.png" width="200">
+</center>
+
+We found that both implementations of the secular Redfield method show a scaling of roughly 
+<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^3.5" title="N^3.5" /></a> with *N* the number of excitonic sites in the system.
 
 
 
