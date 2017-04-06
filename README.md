@@ -29,11 +29,11 @@ However, we are usually unable to keep track the evolution of the complete syste
 In this situation, we use equations that account the influence of the surroundings on the systems, 
 but not keeping track the environment evolutions. 
 These ubiquitous phenomena determine the physics and chemistry in diverse fields, one of the most important is the exciton transfer dynamics[1],
-One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. The density matrix $\rho$ of the excitonic system can be time evolved according to the Liouville-von Neumann equation:
+One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. The density matrix <a href="https://www.codecogs.com/eqnedit.php?latex=\rho" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\rho" title="\rho" /></a> of the excitonic system can be time evolved according to the Liouville-von Neumann equation:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{d}{d&space;t}\rho(t)&space;=&space;\frac{-i}{\hbar}[H_s,\rho(t)]&space;&plus;&space;L&space;(\rho(t))" title="\frac{d}{d t}\rho(t) = \frac{-i}{\hbar}[H_s,\rho(t)] + L (\rho(t))," /></a>
 
-where $L$ denotes the Lindblad operator in the secular Redfield approximation. 
+where <a href="https://www.codecogs.com/eqnedit.php?latex=L" target="_blank"><img src="https://latex.codecogs.com/gif.latex?L" title="L" /></a> denotes the Lindblad operator in the secular Redfield approximation. 
 
 The first term takes into account the evolution of the system without the presence of the environment, while the second keeps track on the environmental influence of the system[3,4]. 
 
