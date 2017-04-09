@@ -1,0 +1,9 @@
+C scripts in this directory perform serial matrix mutliplications on complex
+valued matrices
+
+Two different methods were implemented: 
+- naive matrix multiplication using comlex.h in mat_mul_complex.c
+- naive matrix mutliplication with complex matrices broken up into real and 
+  imaginary part in mat_mul_complexified.c
+
+ The latter implementation is faster for large (N ~> 240) matrices (plots will follow)
