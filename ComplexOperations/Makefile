@@ -7,8 +7,8 @@ else
 	OPTIONS += -l OpenCL
 endif
 
-main: mat_mul_complexified.c
-	gcc -Wall -g mat_mul_complexified.c -o mat_mul_complexified $(OPTIONS)
+main: mat_diagonalize.c
+	gcc -Wall -g mat_diagonalize.c -o mat_diagonalize $(OPTIONS) -llapack -lm
 
 clean:
 	rm -rf matAdd
