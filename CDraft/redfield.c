@@ -25,8 +25,7 @@
 /* Spectral density */
 #define NUMBER 1
 #define lambda_k[NUMBER] = {35.5f};
-nu_k[1] = {35.5f};
- [[35., 50., 0.]]
+#define nu_k[1] = {35.5f};
 
 /*
  * Physical conversions
