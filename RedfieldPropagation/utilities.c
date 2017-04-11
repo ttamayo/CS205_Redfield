@@ -1,4 +1,12 @@
 
+// external modules 
+#include <stdio.h>
+#include <stdlib.h>
+
+// internal modules
+#include "headers.h"
+
+
 // print matrix
 void print_matrix_real(double *A, int N) {
 	int unsigned i, j;
