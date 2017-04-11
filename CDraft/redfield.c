@@ -24,8 +24,8 @@
 
 /* Spectral density */
 #define NUMBER 1
-#define lambda_k[NUMBER] = {35.5f};
-#define nu_k[1] = {35.5f};
+#define lambda_k = {35.5f};
+#define nu_k = {35.5f};
 
 /*
  * Physical conversions
@@ -340,7 +340,7 @@ int main( int argc, char *argv[] )
  
     /* propagation */
     for (i=0; i < STEPS; i++){
-        propagate(rho_rotated,hamiltonian,n);
+        euler_propagate(rho_rotated,hamiltonian,n);
         transform(rho_rotated, eigenvectors_inv, rho, eigenvectors,n);
         record(tape,rho,i+1,n);
         
