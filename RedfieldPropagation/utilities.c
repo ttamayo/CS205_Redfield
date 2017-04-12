@@ -17,4 +17,5 @@ void print_matrix_real(double *A, int N) {
         printf("\n");
     }
     printf("\n");
+    printf("done printing\n");
 }

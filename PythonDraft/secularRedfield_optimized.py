@@ -38,7 +38,7 @@ beta = 1 / (kB * temperature)		# 1 / cm-1
 
 #=============================================================================
 
-shape = 16
+shape = 2
 
 # initialize hamiltonian as (|0>, |1>, ..., |n>, |RC>)
 hamiltonian = np.zeros((shape + 2, shape + 2), dtype = np.complex128)
@@ -163,6 +163,9 @@ class RedfieldPropagator(object):
 			rm_V[0, m, 0, :, :] = rate * V
 			rm_V_dagg[0, m, 0, :, :] = np.conj(np.transpose(V))
 			rm_V_dagg_V[0, m, 0, :, :] = rate * np.dot(np.conj(np.transpose(V)), V)
+
+		print rm_V
+		quit()
 
 		self.rm_V        = rm_V
 		self.rm_V_dagg   = rm_V_dagg

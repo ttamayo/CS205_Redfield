@@ -53,7 +53,7 @@ beta = 1 / (kB * temperature)		# 1 / cm-1
 # i.e. the first column is the loss state, the last column is the target state
 
 # number of excitonic sites in the system
-shape = 16
+shape = 2
 
 # initialize hamiltonian as (|0>, |1>, ..., |n>, |RC>)
 hamiltonian = np.zeros((shape + 2, shape + 2), dtype = np.complex128)
@@ -68,6 +68,7 @@ for i in range(1, shape + 1):
 		hamiltonian[i, j] = number
 		hamiltonian[j, i] = number
 
+print hamiltonian
 # now we can define links to targets and losses
 # these links are defined in units of 1/fs, as opposed to the hamiltonian above, which is defined in cm1
 # target and loss links are defined as dictionaries, with linked excitonic site as index and link rate as target
