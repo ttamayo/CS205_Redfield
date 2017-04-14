@@ -14,7 +14,7 @@
 #define s_to_fs    10.e15
 
 #define HBAR 6.582119514e-16*eV_to_cm1*s_to_fs
-#define HBAR_INV 1. / (6.582119514e-16*eV_to_cm1*s_to_fs)
+#define HBAR_INV 10. / (6.582119514e-16*eV_to_cm1*s_to_fs)
 #define KB   8.6173303e-5*eV_to_cm1
 #define PI   3.1415926532897932384626433832
 #define T    300.0 // FIXME: temperature should be a parameter
@@ -95,9 +95,7 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 
 void get_V(double *V, double *eigvects, int i, int k, int N) {
 	gen_zero_matrix_real(V, N);
-	printf("generated zero matrix\n");
 	V[i + k * N] = 1.;
-	print_matrix_real(V, N);
 	// now we need to rotate
 	rotate(V, eigvects, N);
 }

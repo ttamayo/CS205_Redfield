@@ -11,6 +11,7 @@ from scipy import interpolate
 
 # for reproducibility
 np.random.seed(100691)
+np.set_printoptions(precision = 8)
 
 #=============================================================================
 # unit conversion factors for the code below
@@ -164,6 +165,8 @@ def get_V_RC(m, eigVectors):
 def propagate(rho, energies, vectors, specParams):
 	systemHamiltonian = np.diag(energies)
 	# get the Liouville part of the excitonic hamiltonian 
+	print 'double checking'
+	print np.dot(systemHamiltonian, rho) - np.dot(rho, systemHamiltonian)
 	first = np.dot(systemHamiltonian, rho) - np.dot(rho, systemHamiltonian)
 	first = first * (-1.j / hbar)
 
@@ -176,8 +179,16 @@ def propagate(rho, energies, vectors, specParams):
 				omega = (energies[M] - energies[N])
 				V = get_V(m, vectors)
 				V_dagg = np.conj(np.transpose(V))
+#				print 'V'
+#				print V
+#				print 'V_dagg'
+#				print V_dagg
 				new = np.dot(np.dot(V, rho), V_dagg) - np.dot(V_dagg, np.dot(V, rho)) / 2. - np.dot(rho, np.dot(V_dagg, V)) / 2.
 				rate = get_rate(omega, specParams)
+#				print np.dot(np.dot(V, rho), V_dagg)
+#				print - np.dot(V_dagg, np.dot(V, rho)) / 2. - np.dot(rho, np.dot(V_dagg, V)) / 2.
+#				print new
+#				quit()
 				second = second + rate * new
 
 
@@ -201,13 +212,17 @@ def propagate(rho, energies, vectors, specParams):
 		rate = link_to_loss[m]
 		fourth = fourth + rate * new
 
-#	print 'first'
-#	print first
-#	print 'second'
-#	print second + third + fourth
-#	quit()
+	print 'vectors'
+	print vectors
+	print 'rho'
+	print rho
+	print 'first'
+	print first
+	print 'second'
+	print second
+	quit()
 
-	return first + second + third + fourth
+	return first + second #+ third + fourth
 
 #========================================================================================================================
 
@@ -219,6 +234,10 @@ if __name__ == '__main__':
 	rho = np.zeros((hamiltonian.shape[0], hamiltonian.shape[0]), dtype = np.complex128)
 	# we start population dynamics from site 1 - this is arbitrary
 	rho[1, 1] += 1.
+
+	print 'rho\n', rho
+	print 'test'
+	print np.dot(rho, eigVectors)
 
 	# rotate into excitonic basis
 	rho_rotated = np.dot(np.dot(np.linalg.inv(eigVectors), rho), eigVectors)
@@ -243,6 +262,9 @@ if __name__ == '__main__':
 
 		# get density matrix in site basis
 		probe = np.dot(np.dot(eigVectors, rho_rotated), np.linalg.inv(eigVectors))
+		print '\nprobe:\n'
+		print probe
+		quit()
 		# record populations at this time
 		for i in range(hamiltonian.shape[0]):
 			pop[i].append(probe[i, i])

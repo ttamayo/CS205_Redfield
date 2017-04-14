@@ -78,27 +78,54 @@ void matrix_mul_real(double *A, double *B, double *C, int N) {
 void matrix_mul_complexified(double *A_real, double *A_imag, double *B_real, double *B_imag, double *C_real, double *C_imag, int N) {
 	double *helper_matrix;
 	helper_matrix = (double *) malloc(sizeof(double) * (N * N));
+	double *h1, *h2, *h3;
+	h1 = (double *) malloc(sizeof(double) * (N * N));
+	h2 = (double *) malloc(sizeof(double) * (N * N));
+	h3 = (double *) malloc(sizeof(double) * (N * N));
 
 	// calculate a - b
-	matrix_sub_real(A_real, A_imag, C_real, N);
+	matrix_sub_real(A_real, A_imag, h1, N);
 	// calculate c - d
 	matrix_sub_real(B_real, B_imag, helper_matrix, N);
 	// calculate a + b
-	matrix_add_real(A_real, A_imag, C_imag, N);
+	matrix_add_real(A_real, A_imag, h2, N);
 
 	// now we do the multiplications
 	// calculate (a - b) c
-	matrix_mul_real(C_real, B_real, C_real, N);
+	matrix_mul_real(h1, B_real, C_real, N);
 	// calculate b (c - d)
-	matrix_mul_real(A_imag, helper_matrix, helper_matrix, N);
+	matrix_mul_real(A_imag, helper_matrix, h3, N);
 	// calculate (b + a) d
-	matrix_mul_real(C_imag, B_imag, C_imag, N);
+	matrix_mul_real(h2, B_imag, C_imag, N);
 
 	// now we calculate real and imaginary part of C
-	matrix_add_real(C_real, helper_matrix, C_real, N);
-	matrix_add_real(C_imag, helper_matrix, C_imag, N);
+	matrix_add_real(C_real, h3, C_real, N);
+	matrix_add_real(C_imag, h3, C_imag, N);
 
 	free((void*) helper_matrix);
 }
 
 /* ----------------------------------------------------------- */
+
+
+
+	// calculate a - b
+//	matrix_sub_real(A_real, A_imag, C_real, N);
+	// calculate c - d
+//	matrix_sub_real(B_real, B_imag, helper_matrix, N);
+	// calculate a + b
+//	matrix_add_real(A_real, A_imag, C_imag, N);
+
+	// now we do the multiplications
+	// calculate (a - b) c
+//	matrix_mul_real(C_real, B_real, C_real, N);
+	// calculate b (c - d)
+//	matrix_mul_real(A_imag, helper_matrix, helper_matrix, N);
+	// calculate (b + a) d
+//	matrix_mul_real(C_imag, B_imag, C_imag, N);
+
+	// now we calculate real and imaginary part of C
+//	matrix_add_real(C_real, helper_matrix, C_real, N);
+//	matrix_add_real(C_imag, helper_matrix, C_imag, N);
+
+//	free((void*) helper_matrix);

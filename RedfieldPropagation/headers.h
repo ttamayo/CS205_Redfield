@@ -1,12 +1,18 @@
 
+// from liouville_redfield.c
+
+
+ void hamiltonian_commutator(double *rho_real, double *rho_imag, double *hamiltonian, double *comm_real, double *comm_imag, int N);
 
 // from matrix_generators.c
 void gen_identity_matrix(double *A, int N);
 void gen_zero_matrix_real(double *A, int N);
 void gen_one_matrix_real(double *A, int N);
 void gen_test_hamiltonian(double *A);
-
+void gen_test_links(double *links_to_loss, double *links_to_target, int N);
+void gen_test_spec_densities(double *params);
 void gen_identity_complex(double *A_real, double *A_imag, int N);
+void gen_zero_matrix_complex(double *A_real, double *A_imag, int N);
 
 
 // from multiple_matrix_operations.c

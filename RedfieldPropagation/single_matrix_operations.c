@@ -17,8 +17,9 @@ extern void dsyev_(char* jobz, char* uplo, int* n, double* a, int* lda,
 void transpose(double *A, int N) {
 	int unsigned i, j;
 	double element;
+
 	for (i = 0; i < N; i++) {
-		for (j = 0; j < N; j++) {
+		for (j = i; j < N; j++) {
 			element = A[i + j * N];
 			A[i + j * N] = A[j + i * N];
 			A[j + i * N] = element;
@@ -29,9 +30,11 @@ void transpose(double *A, int N) {
 
 
 void rotate(double *A, double *eigvect, int N) {
-	matrix_mul_real(A, eigvect, A, N);
+	double *h;
+	h = (double *) malloc(sizeof(double) * N * N);
+	matrix_mul_real(A, eigvect, h, N);
 	transpose(eigvect, N);
-	matrix_mul_real(eigvect, A, A, N);
+	matrix_mul_real(eigvect, h, A, N);
 	transpose(eigvect, N);
 }
 
