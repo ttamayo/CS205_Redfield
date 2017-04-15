@@ -113,6 +113,7 @@ def spectral_density(omega, params):
 
 def get_phonon_statistics(omega):
 	omega *= cm1_to_fs1 	    # UNIT CONVERSION HERE!!!
+#	print 'phonon_statistics', omega, 1 / (np.exp(beta * hbar * omega) - 1), beta, 1/hbar
 	return 1 / (np.exp(beta * hbar * omega) - 1)
 
 #========================================================================================================================
@@ -124,8 +125,10 @@ def get_phonon_statistics(omega):
 
 def get_rate(omega, params):
 	if omega < -10**(-12):
+		print '###', omega, get_phonon_statistics(-omega) + 1
 		value = 2 * np.pi * spectral_density(-omega, params) * (get_phonon_statistics(-omega) + 1)
 	elif omega > 10**(-12):
+		print '###', omega, get_phonon_statistics(omega)
 		value = 2 * np.pi * spectral_density(omega, params) * get_phonon_statistics(omega)
 	else:
 		value = 0
@@ -166,6 +169,7 @@ def propagate(rho, energies, vectors, specParams):
 	systemHamiltonian = np.diag(energies)
 	# get the Liouville part of the excitonic hamiltonian 
 	print 'double checking'
+	print energies
 	print np.dot(systemHamiltonian, rho) - np.dot(rho, systemHamiltonian)
 	first = np.dot(systemHamiltonian, rho) - np.dot(rho, systemHamiltonian)
 	first = first * (-1.j / hbar)
@@ -174,8 +178,8 @@ def propagate(rho, energies, vectors, specParams):
 	# therefore we only loop over the exciton states
 	second = np.zeros((vectors.shape[0], vectors.shape[0]), dtype = np.complex128)
 	for m in range(1, shape + 1):
-		for M in range(1, shape + 1):
-			for N in range(1, shape + 1):
+		for M in range(0, shape + 2):
+			for N in range(0, shape + 2):
 				omega = (energies[M] - energies[N])
 				V = get_V(m, vectors)
 				V_dagg = np.conj(np.transpose(V))
@@ -185,6 +189,7 @@ def propagate(rho, energies, vectors, specParams):
 #				print V_dagg
 				new = np.dot(np.dot(V, rho), V_dagg) - np.dot(V_dagg, np.dot(V, rho)) / 2. - np.dot(rho, np.dot(V_dagg, V)) / 2.
 				rate = get_rate(omega, specParams)
+				print 'RATE', m, M, N, energies[M], energies[N], rate
 #				print np.dot(np.dot(V, rho), V_dagg)
 #				print - np.dot(V_dagg, np.dot(V, rho)) / 2. - np.dot(rho, np.dot(V_dagg, V)) / 2.
 #				print new

@@ -17,10 +17,13 @@
 
 
 int main(void) {
+	printf("starting\n");
 	int unsigned i, j, k;
 	double tic, toc;
 	int SIZE;
 	SIZE = NSITES + 2;
+
+//	exit(1);
 
 	double *A, *D, *V, *gammas, *params, *links_to_loss, *links_to_target;
 	A               = (double *) malloc(sizeof(double) * SIZE * SIZE);
@@ -31,7 +34,7 @@ int main(void) {
 	links_to_loss   = (double *) malloc(sizeof(double) * SIZE);
 	links_to_target = (double *) malloc(sizeof(double) * SIZE);
 
-
+//	exit(1);
 
 	gen_random_hamiltonian_real(A, SIZE);
 	gen_test_spec_densities(params, NSITES);
@@ -62,6 +65,7 @@ int main(void) {
 
 	tic = clock();
 
+//	#pragma acc kernels loop gang, vector
 	for (step = 0; step < number_of_steps; step++){
 
 		// get the commutator
@@ -81,10 +85,12 @@ int main(void) {
 		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
 		lindblad_operator(rho_real, rho_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
 
+
 		matrix_mul_scalar(comm_real, dt, SIZE);
 		matrix_mul_scalar(comm_imag, dt, SIZE);
 		matrix_mul_scalar(lindblad_real, dt, SIZE);
 		matrix_mul_scalar(lindblad_imag, dt, SIZE);
+	
 
 //		printf("--- first part ---\n");
 //		print_matrix_real(comm_real, SIZE);
@@ -125,9 +131,9 @@ int main(void) {
 		free((void*) comm_imag);
 		free((void*) lindblad_real);
 		free((void*) lindblad_imag);
-
+//
 	}
-
+//
 	toc = clock();
 
     // Analyze time elapsed
@@ -136,7 +142,7 @@ int main(void) {
     printf("# --------\n");
     printf("# Time Elapsed: %f seconds\n\n", time_spent);
 
-	return 0;
+    return 0;
 
 	// FIXME
 	// not sure why this should be after the return command

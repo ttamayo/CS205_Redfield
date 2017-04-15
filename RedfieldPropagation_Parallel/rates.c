@@ -112,7 +112,7 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 }
 
 
-
+#pragma acc routine
 void get_V(double *V, double *eigvects, int i, int k, int N) {
 	gen_zero_matrix_real(V, N);
 	V[i + k * N] = 1.;

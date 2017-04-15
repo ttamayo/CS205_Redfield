@@ -18,6 +18,7 @@ void gen_identity_real(double *A, int N) {
 
 
 // generates a matrix of size N x N with only zeros
+#pragma acc routine
 void gen_zero_matrix_real(double *A, int N) {
 	int unsigned i, j;
 	for (i = 0; i < N; i++)

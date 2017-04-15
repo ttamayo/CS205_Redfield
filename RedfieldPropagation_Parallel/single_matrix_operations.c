@@ -14,10 +14,12 @@ extern void dsyev_(char* jobz, char* uplo, int* n, double* a, int* lda,
 /********************************************************************/
 
 
+#pragma acc routine
 void transpose(double *A, int N) {
 	int unsigned i, j;
 	double element;
 
+	#pragma acc loop parallel
 	for (i = 0; i < N; i++) {
 		for (j = i; j < N; j++) {
 			element = A[i + j * N];
@@ -28,7 +30,7 @@ void transpose(double *A, int N) {
 }
 
 
-
+#pragma acc routine
 void rotate(double *A, double *eigvect, int N) {
 	double *h;
 	h = (double *) malloc(sizeof(double) * N * N);

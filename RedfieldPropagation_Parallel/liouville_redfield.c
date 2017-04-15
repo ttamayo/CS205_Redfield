@@ -35,11 +35,14 @@
  	help1_imag = (double *) malloc(sizeof(double) * (N * N));
 	help2_imag = (double *) malloc(sizeof(double) * (N * N));
 
+
 	// get the first part of the commutator
 	int unsigned i;
 	for (i = 0; i < N; i++) {
 		h_real[i + i * N] = hamiltonian[i];
 	}
+
+        #pragma acc data copyin(rho_real[0:N*N], rho_imag[0:N*N], h_real[0:N*N], h_imag[0:N*N]) create(help1_real[0:N*N], help1_imag[0:N*N], help2_real[0:N*N], help2_imag[0:N*N]) copy(comm_real[0:N*N], comm_imag[0:N*N])
 
 
 	matrix_mul_complexified(h_real, h_imag, rho_real, rho_imag, help1_real, help1_imag, N);
@@ -68,11 +71,14 @@
 	free((void*) help1_imag);
 	free((void*) help2_real);
 	free((void*) help2_imag);
-
+	
+	#pragma end data
+	
  }
 
 
 
+#pragma acc routine gang
 void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, double *eigVects, double *lindblad_real, double *lindblad_imag, double *links_to_loss, double *links_to_target, int SIZE) {
 	int unsigned m, M, N;
 	double rate;
@@ -89,17 +95,29 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 	helper      = (double *) malloc(sizeof(double) * SIZE * SIZE);
 
 
+//       #pragma acc data copyin(rho_real[0:N*N], rho_imag[0:N*N], h_real[0:N*N], h_imag[0:N*N]) create(help1_real[0:N*N], help1_imag[0:N*N], help2_real[0:N*N], help2_imag[0:N*N]) copy(comm_real[0:N*N], comm_imag[0:N*N])
+ 
 	// decay of excitons into other excitonic states
+//	#pragma acc data copyin(gammas[0:SIZE*SIZE*SIZE])
+//	#pragma acc parallel loop tile(16, 16) gang vector
+	#pragma acc data copyin(V[0:SIZE*SIZE], V_dagg[0:SIZE*SIZE], gammas[0:SIZE*SIZE*SIZE], helper[0:SIZE*SIZE], first_real[0:SIZE*SIZE], second_real[0:SIZE*SIZE], third_real[0:SIZE*SIZE]) copy(rho_real[0:SIZE*SIZE], rho_imag[0:SIZE*SIZE])
+ 
+
 	for (m = 1; m < SIZE - 1; m++) {
+		get_V(V, eigVects, m, m, SIZE);
+		get_V(V_dagg, eigVects, m, m, SIZE);
+		transpose(V_dagg, SIZE);
+		#pragma acc loop independent
 		for (M = 0; M < SIZE; M++) {
+			#pragma acc loop independent
 			for (N = 0; N < SIZE; N++) {
 
 				rate = gammas[M + N * SIZE + m * SIZE * SIZE];
 				rate = (double)(rate);
 
-				get_V(V, eigVects, m, m, SIZE);
-				get_V(V_dagg, eigVects, m, m, SIZE);
-				transpose(V_dagg, SIZE);
+//				get_V(V, eigVects, m, m, SIZE);
+//				get_V(V_dagg, eigVects, m, m, SIZE);
+//				transpose(V_dagg, SIZE);
 
 				matrix_mul_real(V, rho_real, helper, SIZE);
 				matrix_mul_real(helper, V_dagg, first_real, SIZE);
@@ -124,6 +142,7 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 		}
 	}
 
+	#pragma end data
 
 	// decay of excitons into the ground (loss) state
 	for (m = 0; m < SIZE; m++) {
