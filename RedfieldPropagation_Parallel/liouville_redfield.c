@@ -218,3 +218,14 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 
 
 }
+
+
+
+void get_density_update(double *rho_real, double *rho_imag, double *energies, double *comm_real, double *comm_imag, 
+	                    double *gammas, double *eigvects, double *lindblad_real, double *lindblad_imag, double *links_to_loss, double *links_to_target, int N) {
+
+	hamiltonian_commutator(rho_real, rho_imag, energies, comm_real, comm_imag, N);
+	gen_zero_matrix_complex(lindblad_real, lindblad_imag, N);
+	lindblad_operator(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, N);
+
+}

@@ -62,12 +62,17 @@ hamiltonian = np.zeros((shape + 2, shape + 2), dtype = np.complex128)
 # we add random excitonic energies and couplings - who cares about the real deal for this example?!
 # note: we populate i != j states twice, due to the way the sums are set up
 #       not a big deal for now, though
-for i in range(1, shape + 1):
-	for j in range(1, shape + 1):
-		# draw a random number for energy or coupling
-		number = np.random.normal(0.0, 500.0)
-		hamiltonian[i, j] = number
-		hamiltonian[j, i] = number
+#for i in range(1, shape + 1):
+#	for j in range(1, shape + 1):
+#		# draw a random number for energy or coupling
+#		number = np.random.normal(0.0, 500.0)
+#		hamiltonian[i, j] = number
+#		hamiltonian[j, i] = number
+hamiltonian[1, 1] = 43.0
+hamiltonian[1, 2] = 57.0
+hamiltonian[2, 1] = 57.0
+hamiltonian[2, 2] = 55.0
+
 
 print hamiltonian
 # now we can define links to targets and losses
@@ -125,10 +130,10 @@ def get_phonon_statistics(omega):
 
 def get_rate(omega, params):
 	if omega < -10**(-12):
-		print '###', omega, get_phonon_statistics(-omega) + 1
+#		print '###', omega, get_phonon_statistics(-omega) + 1
 		value = 2 * np.pi * spectral_density(-omega, params) * (get_phonon_statistics(-omega) + 1)
 	elif omega > 10**(-12):
-		print '###', omega, get_phonon_statistics(omega)
+#		print '###', omega, get_phonon_statistics(omega)
 		value = 2 * np.pi * spectral_density(omega, params) * get_phonon_statistics(omega)
 	else:
 		value = 0
@@ -168,11 +173,11 @@ def get_V_RC(m, eigVectors):
 def propagate(rho, energies, vectors, specParams):
 	systemHamiltonian = np.diag(energies)
 	# get the Liouville part of the excitonic hamiltonian 
-	print 'double checking'
-	print energies
-	print np.dot(systemHamiltonian, rho) - np.dot(rho, systemHamiltonian)
+#	print 'double checking'
+#	print np.dot(systemHamiltonian, rho) - np.dot(rho, systemHamiltonian)
 	first = np.dot(systemHamiltonian, rho) - np.dot(rho, systemHamiltonian)
 	first = first * (-1.j / hbar)
+
 
 	# this is the contribution of the L_{ex-phon} operator
 	# therefore we only loop over the exciton states
@@ -189,7 +194,7 @@ def propagate(rho, energies, vectors, specParams):
 #				print V_dagg
 				new = np.dot(np.dot(V, rho), V_dagg) - np.dot(V_dagg, np.dot(V, rho)) / 2. - np.dot(rho, np.dot(V_dagg, V)) / 2.
 				rate = get_rate(omega, specParams)
-				print 'RATE', m, M, N, energies[M], energies[N], rate
+#				print 'RATE', m, M, N, energies[M], energies[N], rate
 #				print np.dot(np.dot(V, rho), V_dagg)
 #				print - np.dot(V_dagg, np.dot(V, rho)) / 2. - np.dot(rho, np.dot(V_dagg, V)) / 2.
 #				print new
@@ -217,17 +222,19 @@ def propagate(rho, energies, vectors, specParams):
 		rate = link_to_loss[m]
 		fourth = fourth + rate * new
 
-	print 'vectors'
-	print vectors
-	print 'rho'
-	print rho
-	print 'first'
-	print first
-	print 'second'
-	print second
-	quit()
+#	print 'vectors'
+#	print vectors
+#	print 'rho'
+#	print rho
+#	print 'first'
+#	print first
+#	print 'second'
+#	print second
+#	print 'third'
+#	print third
+#	quit()
 
-	return first + second #+ third + fourth
+	return first + second + third + fourth
 
 #========================================================================================================================
 
@@ -248,8 +255,8 @@ if __name__ == '__main__':
 	rho_rotated = np.dot(np.dot(np.linalg.inv(eigVectors), rho), eigVectors)
 
 	# some more parameters
-	end = 200.
-	dt = 0.025
+	end = 1000.
+	dt = 1.0
 	timeDomain = np.arange(0, end, dt)
 	specDensityParams = [[35., 50., 0.]]
 	pop = []
@@ -267,9 +274,9 @@ if __name__ == '__main__':
 
 		# get density matrix in site basis
 		probe = np.dot(np.dot(eigVectors, rho_rotated), np.linalg.inv(eigVectors))
-		print '\nprobe:\n'
-		print probe
-		quit()
+#		print '\nprobe:\n'
+#		print probe
+#		quit()
 		# record populations at this time
 		for i in range(hamiltonian.shape[0]):
 			pop[i].append(probe[i, i])

@@ -11,10 +11,10 @@
 #define cm1_to_fs1 1. / 33356.40952
 #define fs1_to_cm1 33356.40952
 #define eV_to_cm1  8065.54429
-#define s_to_fs    10.e15
+#define s_to_fs    1.e15
 
 #define HBAR 6.582119514e-16*eV_to_cm1*s_to_fs
-#define HBAR_INV 10. / (6.582119514e-16*eV_to_cm1*s_to_fs)	// FIXME: Units might be off!
+#define HBAR_INV 1. / (6.582119514e-16*eV_to_cm1*s_to_fs)	// FIXME: Units might be off!
 
 /********************************************************************/
 
@@ -40,7 +40,6 @@
 	for (i = 0; i < N; i++) {
 		h_real[i + i * N] = hamiltonian[i];
 	}
-
 
 	matrix_mul_complexified(h_real, h_imag, rho_real, rho_imag, help1_real, help1_imag, N);
 	// get the second part
@@ -93,9 +92,8 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 	for (m = 1; m < SIZE - 1; m++) {
 		for (M = 0; M < SIZE; M++) {
 			for (N = 0; N < SIZE; N++) {
-
 				rate = gammas[M + N * SIZE + m * SIZE * SIZE];
-				rate = (double)(rate);
+//				rate = (double)(rate);
 
 				get_V(V, eigVects, m, m, SIZE);
 				get_V(V_dagg, eigVects, m, m, SIZE);
@@ -116,9 +114,7 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 				matrix_sub_real(first_real, third_real, first_real, SIZE);
 				matrix_mul_scalar(first_real, rate, SIZE);
 
-
 				matrix_add_real(lindblad_real, first_real, lindblad_real, SIZE);
-
 		
 			}
 		}
@@ -136,12 +132,12 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 		matrix_mul_real(V, rho_real, helper, SIZE);
 		matrix_mul_real(helper, V_dagg, first_real, SIZE);
 
-		matrix_mul_real(V, rho_real, helper, SIZE);
-		matrix_mul_real(V_dagg, helper, second_real, SIZE);
+		matrix_mul_real(rho_real, V_dagg, helper, SIZE);
+		matrix_mul_real(helper, V, second_real, SIZE);
 		matrix_mul_scalar(second_real, 0.5, SIZE);
 
 		matrix_mul_real(V_dagg, V, helper, SIZE);
-		matrix_mul_real(rho_real, helper, third_real, SIZE);
+		matrix_mul_real(helper, rho_real, third_real, SIZE);
 		matrix_mul_scalar(third_real, 0.5, SIZE);	
 
 		matrix_sub_real(first_real, second_real, first_real, SIZE);
@@ -151,6 +147,8 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 		matrix_add_real(lindblad_real, first_real, lindblad_real, SIZE);		
 	}
 
+//	print_matrix_real(rho_real, SIZE);
+
 	// decay of excitons into the target (reaction center) state
 	for (m = 0; m < SIZE; m++) {
 		rate = links_to_target[m];
@@ -159,16 +157,15 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 		get_V(V_dagg, eigVects, SIZE - 1, m, SIZE);
 		transpose(V_dagg, SIZE);
 
-
 		matrix_mul_real(V, rho_real, helper, SIZE);
 		matrix_mul_real(helper, V_dagg, first_real, SIZE);
 
-		matrix_mul_real(V, rho_real, helper, SIZE);
-		matrix_mul_real(V_dagg, helper, second_real, SIZE);
+		matrix_mul_real(V_dagg, V, helper, SIZE);
+		matrix_mul_real(helper, rho_real, second_real, SIZE);
 		matrix_mul_scalar(second_real, 0.5, SIZE);
 
-		matrix_mul_real(V_dagg, V, helper, SIZE);
-		matrix_mul_real(rho_real, helper, third_real, SIZE);
+		matrix_mul_real(rho_real, V_dagg, helper, SIZE);
+		matrix_mul_real(helper, V, third_real, SIZE);
 		matrix_mul_scalar(third_real, 0.5, SIZE);	
 
 		matrix_sub_real(first_real, second_real, first_real, SIZE);
@@ -186,16 +183,16 @@ void lindblad_operator(double *rho_real, double *rho_imag, double *gammas, doubl
 	free((void*) third_real);
 	free((void*) helper);
 
-//		double *V;
-//	V = (double *) malloc(sizeof(double) * SIZE * SIZE);
-//	double *V_dagg;
-//	V_dagg = (double *) malloc(sizeof(double) * SIZE * SIZE);
+}
 
-//	double *first_real, *second_real, *third_real, *helper;//, *first_imag, *second_imag, *third_imag;
-//	first_real  = (double *) malloc(sizeof(double) * SIZE * SIZE);
-//	second_real = (double *) malloc(sizeof(double) * SIZE * SIZE);
-//	third_real  = (double *) malloc(sizeof(double) * SIZE * SIZE);
-//	helper      = (double *) malloc(sizeof(double) * SIZE * SIZE);
 
+
+
+void get_density_update(double *rho_real, double *rho_imag, double *energies, double *comm_real, double *comm_imag, 
+	                    double *gammas, double *eigvects, double *lindblad_real, double *lindblad_imag, double *links_to_loss, double *links_to_target, int N) {
+
+	hamiltonian_commutator(rho_real, rho_imag, energies, comm_real, comm_imag, N);
+	gen_zero_matrix_complex(lindblad_real, lindblad_imag, N);
+	lindblad_operator(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, N);
 
 }

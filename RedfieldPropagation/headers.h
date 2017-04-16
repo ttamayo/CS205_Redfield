@@ -19,10 +19,12 @@ void gen_zero_matrix_complex(double *A_real, double *A_imag, int N);
 // from multiple_matrix_operations.c
 void matrix_mul_real(double *A, double *B, double *C, int N);
 void matrix_mul_scalar(double *A, double scalar, int N);
+void matrix_add_complex(double *A_real, double *A_imag, double *B_real, double *B_imag, double *C_real, double *C_imag, int N);
 
 // from rates.c
 void get_rates(double *gammas, double *params, double *energies, int num_params, int Nsites2);
 void get_V(double *V, double *eigvects, int i, int k, int N);
+void get_V_dagg(double *V, double *eigvects, int i, int k, int N);
 
 // from single_matrix_operations.c
 void diagonalize(double *A, double *D, int N);

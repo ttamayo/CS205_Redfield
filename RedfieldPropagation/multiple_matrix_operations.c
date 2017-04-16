@@ -54,13 +54,21 @@ void matrix_mul_real(double *A, double *B, double *C, int N) {
 			sum = 0.;
 			for (k = 0; k < N; k++) {
 				sum += A[i + k * N] * B[k + j * N];
+//				printf("%.16f %.16f %.16f\n", A[i + k * N], B[k + j * N], sum);
 			}
+//			printf("sum %.16f\n", sum);
 			C[i + j * N] = sum;
 		}
 	}
 }
 
 /* ----------------------------------------------------------- */
+
+void matrix_add_complex(double *A_real, double *A_imag, double *B_real, double *B_imag, double *C_real, double *C_imag, int N) {
+	matrix_add_real(A_real, B_real, C_real, N);
+	matrix_add_real(A_imag, B_imag, C_imag, N);
+}
+
 
 /* matrix multiplication for complex matrices C = AB 
  * suppose A = a + ib and B = c + id, then

@@ -90,18 +90,19 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 //		printf("ENERGIES %.10f\n", energies[j]);
 //	}
 
+//	exit(1);
 	// get rates for inter-exciton state transitions
 	for (j = 1; j < Nsites2 - 1; j++) {
 		for (M = 0; M < Nsites2; M++) {
 			for (N = 0; N < Nsites2; N++) {
 
-//				if (energies[M] != 0 && energies[N] != 0) {
+				if (energies[M] != 0 && energies[N] != 0) {
 
 				rate = _get_rate(j - 1, energies[M] - energies[N], params, num_params);
 
-//				} else {
-//					rate = 0;
-//				}
+				} else {
+					rate = 0;
+				}
 
 
 //				printf("%d %d %.5f %.5f %.5f \n", M, N, energies[M], energies[N], rate);
@@ -117,5 +118,12 @@ void get_V(double *V, double *eigvects, int i, int k, int N) {
 	gen_zero_matrix_real(V, N);
 	V[i + k * N] = 1.;
 	// now we need to rotate
+	rotate(V, eigvects, N);
+}
+
+
+void get_V_dagg(double *V, double *eigvects, int i, int k, int N) {
+	gen_zero_matrix_real(V, N);
+	V[k + i * N] = 1.;
 	rotate(V, eigvects, N);
 }

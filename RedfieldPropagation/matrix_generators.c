@@ -51,7 +51,7 @@ void gen_random_hamiltonian_real(double *H, int N) {
 	double number;
 	for (i = 1; i < N - 1; i++) {
 		for (j = 1; j < N - 1; j++) {
-			number = rand()%600;
+			number = rand()%100;
 			H[i + j * N] = number;
 			H[j + i * N] = number;
 		}
@@ -101,6 +101,6 @@ void gen_test_links(double *links_to_loss, double *links_to_target, int N) {
 	int unsigned i;
 	for (i = 1; i < N - 1; i++) {
 		links_to_loss[i] = 0.0005;
-		links_to_target[1] = 0.005;
+		links_to_target[N - 2] = 0.001;
 	}
 }
