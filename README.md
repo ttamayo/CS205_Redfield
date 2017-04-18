@@ -93,7 +93,7 @@ However, the action of the Lindblad operator on the density matrix needs to be c
 </center>
 
 We found that both implementations of the secular Redfield method show a scaling of roughly 
-<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^3.5" title="N^3.5" /></a> with *N* the number of excitonic sites in the system.
+<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^3.5" title="N^{3.5}" /></a> with *N* the number of excitonic sites in the system.
 
 
 

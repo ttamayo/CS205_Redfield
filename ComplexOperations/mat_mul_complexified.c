@@ -99,7 +99,7 @@ void matrix_mul_real(double *A, double *B, double *C, int N) {
  * suppose A = a + ib and B = c + id, then
  * C = (a + ib) (c + id) = (ac - bd) + i (ad + bc)
  * which can be rewritten in the form
- * C = [ c (a - b) + b (c - d) ] + i [ b (c - d) + d (a + b) ]
+ * C = [ (a - b) c + b (c - d)] + i [ b (c - d) + (b + a) d]
  * 
  * disadvantage: we need to generate matrices a - b, a + b and c - d
  * 
@@ -109,26 +109,29 @@ void matrix_mul_real(double *A, double *B, double *C, int N) {
  *
  */
 void matrix_mul_complexified(double *A_real, double *A_imag, double *B_real, double *B_imag, double *C_real, double *C_imag, int N) {
-	double *c_m_d, *a_m_b, *c_p_d;
-	c_m_d = (double *)malloc(sizeof(double) * (N * N));
-	a_m_b = (double *)malloc(sizeof(double) * (N * N));
-	c_p_d = (double *)malloc(sizeof(double) * (N * N));
+	double *helper_matrix;
+	helper_matrix = (double *) malloc(sizeof(double) * (N * N));
 
-	matrix_sub_real(B_real, B_imag, c_m_d, N);
-	matrix_sub_real(A_real, A_imag, a_m_b, N);
-	matrix_add_real(B_real, B_imag, c_p_d, N);
+	// calculate a - b
+	matrix_sub_real(A_real, A_imag, C_real, N);
+	// calculate c - d
+	matrix_sub_real(B_real, B_imag, helper_matrix, N);
+	// calculate a + b
+	matrix_add_real(A_real, A_imag, C_imag, N);
 
-	double *C_real_first, *C_real_second, *C_imag_first;
-	C_real_first = (double *)malloc(sizeof(double) * (N * N));
-	C_real_second = (double *)malloc(sizeof(double) * (N * N));
-	C_imag_first = (double *)malloc(sizeof(double) * (N * N));
+	// now we do the multiplications
+	// calculate (a - b) c
+	matrix_mul_real(C_real, B_real, C_real, N);
+	// calculate b (c - d)
+	matrix_mul_real(A_imag, helper_matrix, helper_matrix, N);
+	// calculate (b + a) d
+	matrix_mul_real(C_imag, B_imag, C_imag, N);
 
-	matrix_mul_real(A_real, c_m_d, C_real_first, N);
-	matrix_mul_real(a_m_b, C_imag, C_real_second, N);
-	matrix_mul_real(A_imag, c_p_d, C_imag_first, N);
+	// now we calculate real and imaginary part of C
+	matrix_add_real(C_real, helper_matrix, C_real, N);
+	matrix_add_real(C_imag, helper_matrix, C_imag, N);
 
-	matrix_add_real(C_real_first, C_real_second, C_real, N);
-	matrix_add_real(C_imag_first, C_real_second, C_imag, N); 
+	free((void*) helper_matrix);
 }
 
 /* ----------------------------------------------------------- */
