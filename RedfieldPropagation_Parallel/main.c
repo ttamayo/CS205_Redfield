@@ -10,7 +10,11 @@
 
 /**********************************************************************/
 
+<<<<<<< HEAD
 #define NSITES 12
+=======
+#define NSITES 2
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 #define dt 1.0
 
 /**********************************************************************/
@@ -59,7 +63,11 @@ int main(void) {
 	rotate(rho_imag, A, SIZE);
 
 
+<<<<<<< HEAD
 	double *comm_real, *comm_imag;
+=======
+double *comm_real, *comm_imag;
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 	comm_real = (double *) malloc(sizeof(double) * SIZE * SIZE);
 	comm_imag = (double *) malloc(sizeof(double) * SIZE * SIZE);
 	double *lindblad_real, *lindblad_imag;
@@ -81,6 +89,7 @@ int main(void) {
 
 
 	int unsigned step, number_of_steps;
+<<<<<<< HEAD
 	number_of_steps = 50;
 
 	tic = clock();
@@ -94,6 +103,16 @@ int main(void) {
 		// implementing a 4th order runge kutta scheme here
 		// get k1	
 	
+=======
+	number_of_steps = 2000;
+
+	tic = clock();
+
+	for (step = 0; step < number_of_steps; step++){
+
+		// implementing a 4th order runge kutta scheme here
+		// get k1
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 		get_density_update(rho_real, rho_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
 
 //		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
@@ -158,12 +177,21 @@ int main(void) {
 //		printf("... and ...\n");
 //		print_matrix_real(rho_imag, SIZE);
 
+<<<<<<< HEAD
 //		printf("%d ", step);
 //		for (i = 0; i < SIZE; i++) {
 //			printf("%.10f ", rho_real[i + i * SIZE]);
 //		}
 //		printf("\n");
 //
+=======
+		printf("%d ", step);
+		for (i = 0; i < SIZE; i++) {
+			printf("%.10f ", rho_real[i + i * SIZE]);
+		}
+		printf("\n");
+
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 		rotate(rho_real, A, SIZE);
 		rotate(rho_imag, A, SIZE);
 	

@@ -6,7 +6,11 @@
 
 // internal modules 
 #include "headers.h"
+<<<<<<< HEAD
 //#include "matrix_generators.h"
+=======
+
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 
 #define cm1_to_fs1 1. / 33356.40952
 #define fs1_to_cm1 33356.40952
@@ -112,6 +116,7 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 }
 
 
+<<<<<<< HEAD
 #pragma acc routine worker
 void get_V(double *V, double *eigvects, int i, int k, int N) {
 	int unsigned x, y, z;	
@@ -163,3 +168,12 @@ void get_V(double *V, double *eigvects, int i, int k, int N) {
 
 
 
+=======
+#pragma acc routine
+void get_V(double *V, double *eigvects, int i, int k, int N) {
+	gen_zero_matrix_real(V, N);
+	V[i + k * N] = 1.;
+	// now we need to rotate
+	rotate(V, eigvects, N);
+}
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e

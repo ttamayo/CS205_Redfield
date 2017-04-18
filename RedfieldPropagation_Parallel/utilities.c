@@ -18,4 +18,8 @@ void print_matrix_real(double *A, int N) {
     }
     printf("\n");
 //    printf("done printing\n");
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e

@@ -18,6 +18,7 @@ void gen_identity_real(double *A, int N) {
 
 
 // generates a matrix of size N x N with only zeros
+<<<<<<< HEAD
 #pragma acc routine worker
 void gen_zero_matrix_real(double *A, int N) {
 	int unsigned i, j;
@@ -27,6 +28,14 @@ void gen_zero_matrix_real(double *A, int N) {
 		#pragma acc loop independent
 		for (j = 0; j < N; j++)
 			A[j + i * N] = 0.;
+=======
+#pragma acc routine
+void gen_zero_matrix_real(double *A, int N) {
+	int unsigned i, j;
+	for (i = 0; i < N; i++)
+		for (j = 0; j < N; j++)
+			A[i + j * N] = 0.;
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 }
 
 
@@ -72,6 +81,7 @@ void gen_identity_complex(double *A_real, double *A_imag, int N) {
 	gen_zero_matrix_real(A_imag, N);
 }
 
+<<<<<<< HEAD
 #pragma acc routine worker
 void gen_zero_matrix_complex(double *A_real, double *A_imag, int N) {
 	int unsigned i, j;
@@ -84,6 +94,11 @@ void gen_zero_matrix_complex(double *A_real, double *A_imag, int N) {
 			A_imag[j + i * N] = 0.;
 		}
 	}
+=======
+void gen_zero_matrix_complex(double *A_real, double *A_imag, int N) {
+	gen_zero_matrix_real(A_real, N);
+	gen_zero_matrix_real(A_imag, N);
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 }
 
 
