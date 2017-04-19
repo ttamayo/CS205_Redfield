@@ -14,7 +14,29 @@
 #include <time.h>
 
 #include "headers.h"
+<<<<<<< HEAD
 //#include "multiple_matrix_operations.h"
+=======
+<<<<<<< HEAD
+//#include "multiple_matrix_operations.h"
+
+/* ----------------------------------------------------------- */
+// operations on matrix and scalars
+#pragma acc routine worker
+void matrix_mul_scalar(double *A, double scalar, int N) {
+ 	int unsigned i, j;
+	#pragma acc data present_or_copy(A[0:N*N])
+//	#pragma acc loop worker, vector
+//	#pragma acc kernels
+	#pragma acc loop independent
+ 	for (i = 0; i < N; i++)
+                #pragma acc loop independent
+		//#pragma acc loop worker, vector
+ 		for (j = 0; j < N; j++)
+ 			A[j + i * N] *= scalar;
+=======
+
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
 /* ----------------------------------------------------------- */
 // operations on matrix and scalars
@@ -29,7 +51,13 @@ void matrix_mul_scalar(double *A, double scalar, int N) {
 //                #pragma acc loop independent
 		//#pragma acc loop worker, vector
  		for (j = 0; j < N; j++)
+<<<<<<< HEAD
  			A[j + i * N] *= scalar;
+=======
+ 			A[i + j * N] *= scalar;
+//	#pragma end data
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
  }
 
 
@@ -37,7 +65,48 @@ void matrix_mul_scalar(double *A, double scalar, int N) {
 // matrix operations on real valued matrices
 
 // adding two real valued matrices C = A + B (naive implementation)
+<<<<<<< HEAD
 //#pragma acc routine worker
+=======
+<<<<<<< HEAD
+#pragma acc routine worker
+void matrix_add_real(double *A, double *B, double *C, int N) {
+	int unsigned i, j;
+	#pragma acc data present_or_copyin(A[0:N*N], B[0:N*N]) present_or_copy(C[0:N*N])
+	#pragma acc loop independent
+	for (i = 0; i < N; i++) 
+		#pragma acc loop independent
+		for (j = 0; j < N; j++) 
+			C[j + i * N] = A[j + i * N] + B[j + i * N];
+}
+
+// subtracting two real valued matrices C = A - B (naive implementation)
+#pragma acc routine worker
+void matrix_sub_real(double *A, double *B, double *C, int N) {
+	int unsigned i, j;
+	#pragma acc data present_or_copyin(A[0:N*N], B[0:N*N]) present_or_copy(C[0:N*N])
+	#pragma acc loop independent
+	for (i = 0; i < N; i++) 
+		#pragma acc loop independent
+		for (j = 0; j < N; j++) 
+			C[j + i * N] = A[j + i * N] - B[j + i * N];
+}
+
+// multiplying two real valued matrices C = AB (naive implementation)
+#pragma acc routine worker
+void matrix_mul_real(double *A, double *B, double *C, int N) {
+	int unsigned i, j, k;
+	double sum;
+	#pragma acc data present_or_copyin(A[0:N*N], B[0:N*N]) present_or_copy(C[0:N*N])
+	#pragma acc loop worker
+	for (i = 0; i < N; i++) {
+		#pragma acc loop worker, vector
+		for (j = 0; j < N; j++) {
+			sum = 0.;
+			#pragma acc loop worker, vector
+=======
+#pragma acc routine
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 void matrix_add_real(double *A, double *B, double *C, int N) {
 	int unsigned i, j;
 //	#pragma acc data present_or_copyin(A[0:N*N], B[0:N*N]) present_or_copy(C[0:N*N])
@@ -71,7 +140,11 @@ void matrix_mul_real(double *A, double *B, double *C, int N) {
 //		#pragma acc loop worker, vector
 		for (j = 0; j < N; j++) {
 			sum = 0.;
+<<<<<<< HEAD
 //			#pragma acc loop worker, vector
+=======
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 			for (k = 0; k < N; k++) {
 				sum += A[i + k * N] * B[k + j * N];
 			}

@@ -10,8 +10,17 @@
 
 /**********************************************************************/
 
+<<<<<<< HEAD
 #define NSITES 22
 #define dt 0.5
+=======
+<<<<<<< HEAD
+#define NSITES 12
+=======
+#define NSITES 2
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+#define dt 1.0
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
 /**********************************************************************/
 
@@ -67,7 +76,15 @@ int main(void) {
 	rotate(rho_imag, A, SIZE);
 
 
+<<<<<<< HEAD
 	double *comm_real, *comm_imag;
+=======
+<<<<<<< HEAD
+	double *comm_real, *comm_imag;
+=======
+double *comm_real, *comm_imag;
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 	comm_real = (double *) malloc(sizeof(double) * SIZE * SIZE);
 	comm_imag = (double *) malloc(sizeof(double) * SIZE * SIZE);
 	double *lindblad_real, *lindblad_imag;
@@ -90,7 +107,26 @@ int main(void) {
 //	int unsigned i, j, k;
 
 	int unsigned step, number_of_steps;
+<<<<<<< HEAD
 	number_of_steps = 5;
+=======
+<<<<<<< HEAD
+	number_of_steps = 50;
+
+	tic = clock();
+
+	#pragma acc data copyin(gammas[0:SIZE*SIZE*SIZE], D[0:SIZE], A[0:SIZE*SIZE], links_to_loss[0:SIZE], links_to_target[0:SIZE]) 
+	#pragma acc data create(k1_real[0:SIZE*SIZE], k1_imag[0:SIZE*SIZE], k2_real[0:SIZE*SIZE], k2_imag[0:SIZE*SIZE], k3_real[0:SIZE*SIZE], k3_imag[0:SIZE*SIZE], k4_real[0:SIZE*SIZE], k4_imag[0:SIZE*SIZE]) 
+	#pragma acc data create(comm_real[0:SIZE*SIZE], comm_imag[0:SIZE*SIZE], lindblad_real[0:SIZE*SIZE], lindblad_imag[0:SIZE*SIZE], h1_real[0:SIZE*SIZE], h1_imag[0:SIZE*SIZE]) 
+	#pragma acc data copy(rho_real[0:SIZE*SIZE], rho_imag[0:SIZE*SIZE])  
+	for (step = 0; step < number_of_steps; step++){
+
+		// implementing a 4th order runge kutta scheme here
+		// get k1	
+	
+=======
+	number_of_steps = 2000;
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
 	tic = clock();
 
@@ -101,6 +137,7 @@ int main(void) {
 	for (step = 0; step < number_of_steps; step++){
 
 		// implementing a 4th order runge kutta scheme here
+<<<<<<< HEAD
 
 		//=== get k1 ===//	
 		get_density_update(rho_real, rho_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, SIZE);
@@ -158,6 +195,60 @@ int main(void) {
 			}
 		}
 
+=======
+		// get k1
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+		get_density_update(rho_real, rho_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
+
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k1_real, k1_imag, SIZE);
+
+		// get k2
+		matrix_mul_scalar(k1_real, dt/2., SIZE);
+		matrix_mul_scalar(k1_imag, dt/2., SIZE);
+		matrix_add_complex(rho_real, rho_imag, k1_real, k1_imag, h1_real, h1_imag, SIZE);
+		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
+
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k2_real, k2_imag, SIZE);
+
+		// get k3
+		matrix_mul_scalar(k2_real, dt/2., SIZE);
+		matrix_mul_scalar(k2_imag, dt/2., SIZE);
+		matrix_add_complex(rho_real, rho_imag, k2_real, k2_imag, h1_real, h1_imag, SIZE);
+		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
+
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k3_real, k3_imag, SIZE);
+		
+		// get k4
+		matrix_mul_scalar(k3_real, dt, SIZE);
+		matrix_mul_scalar(k3_imag, dt, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k3_real, k3_imag, h1_real, h1_imag, SIZE);
+		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
+
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k4_real, k4_imag, SIZE);
+		
+		// summary:
+		// we computed k1 * dt / 2., k2 * dt / 2., k3 * dt, k4
+
+		// now we update the density
+		// the update comprises of k1 * dt / 6., k2 * dt / 3., k3 * dt / 3., k4 * dt / 6.
+		matrix_mul_scalar(k1_real, 1/3., SIZE);
+		matrix_mul_scalar(k1_imag, 1/3., SIZE);
+		matrix_mul_scalar(k2_real, 2/3., SIZE);
+		matrix_mul_scalar(k2_imag, 2/3., SIZE);
+		matrix_mul_scalar(k3_real, 1/3., SIZE);
+		matrix_mul_scalar(k3_imag, 1/3., SIZE);
+		matrix_mul_scalar(k4_real, dt / 6., SIZE);
+		matrix_mul_scalar(k4_imag, dt / 6., SIZE);
+
+		matrix_add_complex(rho_real, rho_imag, k1_real, k1_imag, rho_real, rho_imag, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k2_real, k2_imag, rho_real, rho_imag, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k3_real, k3_imag, rho_real, rho_imag, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k4_real, k4_imag, rho_real, rho_imag, SIZE);
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
 		// done with Runge Kutta step
 
@@ -168,12 +259,32 @@ int main(void) {
 		rotate(rho_imag, A, SIZE);
 		transpose(A, SIZE);
 
+<<<<<<< HEAD
+=======
+//		printf("new rho:\n");
+//		print_matrix_real(rho_real, SIZE);
+//		printf("... and ...\n");
+//		print_matrix_real(rho_imag, SIZE);
+
+<<<<<<< HEAD
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 //		printf("%d ", step);
 //		for (i = 0; i < SIZE; i++) {
 //			printf("%.10f ", rho_real[i + i * SIZE]);
 //		}
 //		printf("\n");
+<<<<<<< HEAD
+=======
+//
+=======
+		printf("%d ", step);
+		for (i = 0; i < SIZE; i++) {
+			printf("%.10f ", rho_real[i + i * SIZE]);
+		}
+		printf("\n");
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
 		rotate(rho_real, A, SIZE);
 		rotate(rho_imag, A, SIZE);
 	

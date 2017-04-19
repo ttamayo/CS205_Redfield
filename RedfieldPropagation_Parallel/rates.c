@@ -6,7 +6,15 @@
 
 // internal modules 
 #include "headers.h"
+<<<<<<< HEAD
 //#include "matrix_generators.h"
+=======
+<<<<<<< HEAD
+//#include "matrix_generators.h"
+=======
+
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
 #define cm1_to_fs1 1. / 33356.40952
 #define fs1_to_cm1 33356.40952
@@ -112,6 +120,7 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 }
 
 
+<<<<<<< HEAD
 #pragma acc routine gang
 void get_V_matrices(double * restrict V, double * restrict eigvects, int N) {
 	double * restrict helper;
@@ -216,17 +225,76 @@ void get_V_matrices(double * restrict V, double * restrict eigvects, int N) {
 	} 
 
 //	V[i + j * N + k * N*N + (0, 1, 2) * N*N*N]
+=======
+<<<<<<< HEAD
+#pragma acc routine worker
+void get_V(double *V, double *eigvects, int i, int k, int N) {
+	int unsigned x, y, z;	
+	#pragma acc data present_or_copy(V[0:N*N], eigvects[0:N*N])
+	#pragma acc loop independent
+	for (x = 0; x < N; x++) {
+		#pragma acc loop independent
+		for(y = 0; y < N; y++) {
+			V[y + x * N] = 0.;
+		}
+	}
+	V[i + k * N] = 1.;
+	#pragma end kernels
+
+	double *h;
+	h = (double *) malloc(sizeof(double) * N * N);
+	double sum;	
+
+	#pragma acc data present_or_copy(V[0:N*N], eigvects[0:N*N]) present_or_copyin(h[0:N*N])
+	#pragma acc loop independent worker vector
+	for (x = 0; x < N; x++) {
+		#pragma acc loop
+		for (y = 0; y < N; y++) {
+			sum = 0;
+			#pragma acc loop reduction(+:sum)
+			for (z = 0; z < N; z++) {
+				sum += V[x + z * N] * eigvects[z + y * N];
+			}
+			h[x + y * N] = sum;
+		}
+	}
+	#pragma acc data present_or_copy(V[0:N*N], eigvects[0:N*N]) present_or_copyout(h[0:N*N])
+	#pragma acc loop independent worker vector
+	for (x = 0; x < N; x++) {
+		#pragma acc loop 
+		for (y = 0; y < N; y++) {
+			sum = 0;
+			#pragma acc loop reduction(+:sum)
+			for (z = 0; z < N; z++) {
+				sum += eigvects[y + x * N] * h[y + z * N]; 
+			}
+			V[x + y * N] = sum;
+		}
+	}
+
+	free((void*) h);
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 }
 
 
 
+<<<<<<< HEAD
 //#pragma acc routine worker
+=======
+
+=======
+#pragma acc routine
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 void get_V(double *V, double *eigvects, int i, int k, int N) {
         gen_zero_matrix_real(V, N);
         V[i + k * N] = 1.;
         // now we need to rotate
         rotate(V, eigvects, N);
 }
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa

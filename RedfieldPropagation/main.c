@@ -10,7 +10,15 @@
 
 /**********************************************************************/
 
+<<<<<<< HEAD
 #define NSITES 6
+=======
+<<<<<<< HEAD
+#define NSITES 6
+=======
+#define NSITES 2
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 #define dt 1.0
 
 /**********************************************************************/
@@ -80,7 +88,15 @@ int main(void) {
 
 
 	int unsigned step, number_of_steps;
+<<<<<<< HEAD
 	number_of_steps = 1000;
+=======
+<<<<<<< HEAD
+	number_of_steps = 1000;
+=======
+	number_of_steps = 2000;
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
 	tic = clock();
 
@@ -152,11 +168,25 @@ int main(void) {
 //		printf("... and ...\n");
 //		print_matrix_real(rho_imag, SIZE);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 //		printf("%d ", step);
 //		for (i = 0; i < SIZE; i++) {
 //			printf("%.10f ", rho_real[i + i * SIZE]);
 //		}
 //		printf("\n");
+<<<<<<< HEAD
+=======
+=======
+		printf("%d ", step);
+		for (i = 0; i < SIZE; i++) {
+			printf("%.10f ", rho_real[i + i * SIZE]);
+		}
+		printf("\n");
+>>>>>>> 8a8db8f89679f383fb17ba16f8a581ae653ec48e
+>>>>>>> 4dd0983a47a7cf0708d39e1c642cc42d3cd430fa
 
 		rotate(rho_real, A, SIZE);
 		rotate(rho_imag, A, SIZE);
