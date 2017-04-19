@@ -6,7 +6,7 @@
 
 // internal modules 
 #include "headers.h"
-
+//#include "matrix_generators.h"
 
 #define cm1_to_fs1 1. / 33356.40952
 #define fs1_to_cm1 33356.40952
@@ -112,10 +112,121 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 }
 
 
-#pragma acc routine
-void get_V(double *V, double *eigvects, int i, int k, int N) {
-	gen_zero_matrix_real(V, N);
-	V[i + k * N] = 1.;
-	// now we need to rotate
-	rotate(V, eigvects, N);
+#pragma acc routine gang
+void get_V_matrices(double * restrict V, double * restrict eigvects, int N) {
+	double * restrict helper;
+	helper = (double *) malloc(sizeof(double) * N*N);
+	double sum;
+	int unsigned i, j, k, l;
+
+	#pragma acc loop parallel independent gang
+	for (i = 0; i < N; i++)
+		#pragma acc loop parallel independent worker 
+		for (j = 0; j < N; j++) 
+			#pragma acc loop parallel independent vector
+			for (k = 0; k < N; k++)
+				#pragma acc loop parallel  independent
+				for (l = 0; l < 3; l++) 
+					V[k + j * N + i * N*N + l * N*N*N] = 0.;
+
+	// V is a tensor of shape SIZE x SIZE x SIZE x 3
+	#pragma acc loop gang
+	for (i = 1; i < N - 1; i++) {
+		// first, we generate |m><m| at position 
+		// gen zero matrix
+		#pragma acc loop parallel independent worker
+		for (j = 0; j < N; j++) {
+			#pragma acc loop parallel independent vector
+			for (k = 0; k < N; k++) {
+				V[k + j * N + i * N*N + 0 * N*N*N] = 0.;
+				V[k + j * N + i * N*N + 1 * N*N*N] = 0.;
+				V[k + j * N + i * N*N + 2 * N*N*N] = 0.;
+			}
+		}
+		// set one position to 1 for |m><m|
+		V[i + i * N + i * N*N + 1 * N*N*N] = 1.;
+		// now rotate eigvect.T * V * eigvect
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				sum = 0;
+				for (l = 0; l < N; l++) {
+					sum += V[j + l * N + i * N*N + N*N*N] * eigvects[l + k * N];
+				}
+				helper[j + k * N] = sum;
+			}
+		}
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				sum = 0;
+				for (l = 0; l < N; l++) {
+					sum += eigvects[l + j * N] * helper[l + k * N];
+				}
+				V[j + k * N + i * N*N + N*N*N] = sum;
+			}
+		} // done rotating
+
+	// ---
+
+		// set one position to 1 for |0><m|
+		V[0 + i * N + i * N*N + 0 * N*N*N] = 1.;
+		// now we rotate again
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				sum = 0;
+				for (l = 0; l < N; l++) {
+					sum += V[j + l * N + i * N*N + 0 * N*N*N] * eigvects[l + k * N];
+				}
+				helper[j + k * N] = sum;
+			}
+		}
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				sum = 0;
+				for (l = 0; l < N; l++) {
+					sum += eigvects[l + j * N] * helper[l + k * N];
+				}
+				V[j + k * N + i * N*N + 0 * N*N*N] = sum;
+			}
+		} // done rotating
+
+	// ---		
+
+		// set one position to 1 for |RC><m|
+		V[(N - 1) + i * N + i * N*N + 2 * N*N*N] = 1.;
+		// now we rotate again
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				sum = 0;
+				for (l = 0; l < N; l++) {
+					sum += V[j + l * N + i * N*N + 2 * N*N*N] * eigvects[l + k * N];
+				}
+				helper[j + k * N] = sum;
+			}
+		}
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				sum = 0;
+				for (l = 0; l < N; l++) {
+					sum += eigvects[l + j * N] * helper[l + k * N];
+				}
+				V[j + k * N + i * N*N + 2 * N*N*N] = sum;
+			}
+		} // done rotating
+
+	} 
+
+//	V[i + j * N + k * N*N + (0, 1, 2) * N*N*N]
 }
+
+
+
+//#pragma acc routine worker
+void get_V(double *V, double *eigvects, int i, int k, int N) {
+        gen_zero_matrix_real(V, N);
+        V[i + k * N] = 1.;
+        // now we need to rotate
+        rotate(V, eigvects, N);
+}
+
+
+

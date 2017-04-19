@@ -1,4 +1,7 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "headers.h"
 
 /********************************************************************/
@@ -18,12 +21,15 @@ void gen_identity_real(double *A, int N) {
 
 
 // generates a matrix of size N x N with only zeros
-#pragma acc routine
+//#pragma acc routine worker
 void gen_zero_matrix_real(double *A, int N) {
 	int unsigned i, j;
+//	#pragma acc data present_or_copy(A[0:N*N])
+//	#pragma acc loop independent
 	for (i = 0; i < N; i++)
+//		#pragma acc loop independent
 		for (j = 0; j < N; j++)
-			A[i + j * N] = 0.;
+			A[j + i * N] = 0.;
 }
 
 
@@ -41,7 +47,7 @@ void gen_random_matrix_real(double *mat, int N) {
     for (i = 0; i < N; i++)
         for (j = 0; j < N; j++)
             // each component between 0 and 9
-            mat[i + j * N] = rand()%10;
+            mat[i + j * N] = 10;
 }
 
 
@@ -52,7 +58,7 @@ void gen_random_hamiltonian_real(double *H, int N) {
 	double number;
 	for (i = 1; i < N - 1; i++) {
 		for (j = 1; j < N - 1; j++) {
-			number = rand()%600;
+			number = rand()%1000;
 			H[i + j * N] = number;
 			H[j + i * N] = number;
 		}
@@ -69,9 +75,18 @@ void gen_identity_complex(double *A_real, double *A_imag, int N) {
 	gen_zero_matrix_real(A_imag, N);
 }
 
+//#pragma acc routine worker
 void gen_zero_matrix_complex(double *A_real, double *A_imag, int N) {
-	gen_zero_matrix_real(A_real, N);
-	gen_zero_matrix_real(A_imag, N);
+	int unsigned i, j;
+//	#pragma acc data present_or_copy(A_real[0:N*N], A_imag[0:N*N])
+//	#pragma acc loop independent
+	for (i = 0; i < N; i++) {
+//		#pragma acc loop independent
+		for (j = 0; j < N; j++) {
+			A_real[j + i * N] = 0.;
+			A_imag[j + i * N] = 0.;
+		}
+	}
 }
 
 
@@ -101,7 +116,7 @@ void gen_test_spec_densities(double *params, int N) {
 void gen_test_links(double *links_to_loss, double *links_to_target, int N) {
 	int unsigned i;
 	for (i = 1; i < N - 1; i++) {
-		links_to_loss[i] = 0.0005;
+		links_to_loss[i] = 0.001;
 		links_to_target[1] = 0.005;
 	}
 }

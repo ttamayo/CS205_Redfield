@@ -10,7 +10,7 @@
 
 /**********************************************************************/
 
-#define NSITES 2
+#define NSITES 6
 #define dt 1.0
 
 /**********************************************************************/
@@ -80,7 +80,7 @@ int main(void) {
 
 
 	int unsigned step, number_of_steps;
-	number_of_steps = 2000;
+	number_of_steps = 1000;
 
 	tic = clock();
 
@@ -152,11 +152,11 @@ int main(void) {
 //		printf("... and ...\n");
 //		print_matrix_real(rho_imag, SIZE);
 
-		printf("%d ", step);
-		for (i = 0; i < SIZE; i++) {
-			printf("%.10f ", rho_real[i + i * SIZE]);
-		}
-		printf("\n");
+//		printf("%d ", step);
+//		for (i = 0; i < SIZE; i++) {
+//			printf("%.10f ", rho_real[i + i * SIZE]);
+//		}
+//		printf("\n");
 
 		rotate(rho_real, A, SIZE);
 		rotate(rho_imag, A, SIZE);

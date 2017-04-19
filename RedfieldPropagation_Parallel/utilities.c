@@ -8,6 +8,7 @@
 
 
 // print matrix
+//#pragma acc routine
 void print_matrix_real(double *A, int N) {
 	int unsigned i, j;
     for (i = 0; i < N; i++) {

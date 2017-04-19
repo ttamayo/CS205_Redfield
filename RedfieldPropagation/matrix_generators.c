@@ -100,7 +100,7 @@ void gen_test_spec_densities(double *params, int N) {
 void gen_test_links(double *links_to_loss, double *links_to_target, int N) {
 	int unsigned i;
 	for (i = 1; i < N - 1; i++) {
-		links_to_loss[i] = 0.0005;
-		links_to_target[N - 2] = 0.001;
+		links_to_loss[i] = 0.0001;
+		links_to_target[N - 2] = 0.0001;
 	}
 }
