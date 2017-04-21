@@ -113,8 +113,8 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 
 
 #pragma acc routine gang
-void get_V_matrices(double * restrict V, double * restrict eigvects, int N) {
-	double * restrict helper;
+void get_V_matrices(double * V, double * eigvects, int N) {
+	double * helper;
 	helper = (double *) malloc(sizeof(double) * N*N);
 	double sum;
 	int unsigned i, j, k, l;
