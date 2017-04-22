@@ -4,7 +4,7 @@
 Florian Hase, Hannah Sim, and Teresa Tamayo
 
 In this project, we are going to implement and parallelize a 
-method for computing the time evolution of the density matrix in an open quantum, 
+method for computing the time evolution of the density matrix in an open quantum system, 
 the Redfield method. This method applies to some photosynthetically active protein complexes[1,2]. 
 
 <center>
@@ -30,8 +30,8 @@ given that in general is impossible to isolate it. Hence, the dynamics of a quan
 substantially on the interaction of the external environment. 
 However, we are usually unable to keep track the evolution of the complete systems and their surroundings. 
 In this situation, we use equations that account the influence of the surroundings on the systems, 
-but not keeping track the environment evolutions. 
-These ubiquitous phenomena determine the physics and chemistry in diverse fields, one of the most important is the exciton transfer dynamics[1],
+but not explicitly keeping track of the environment evolutions. 
+These ubiquitous phenomena determine the physics and chemistry in diverse fields, one of the most important is the exciton transfer dynamics[1].
 One way to describe these dynamics is to utilize the Redfield master equations, where we assume that the transport is a dissipative dynamics for the reduced excitonic density matrix[3,4]. This model considers the interactions between the environment and the system weak and that the system depends only on its present state. In the Redfield approximation, the relaxation time scale on which the environment interacts with the excitonic system is assumed to be large compared to the coherence time scale of the excitonic system itself. While only under this assumption the Redfield approximation yields the correct dynamics it will always generate the correct thermalized states. However, if the assumption is violated, the Redfield method may predict unphysical negative exciton populations. 
 
 
@@ -40,7 +40,7 @@ The density matrix of the excitonic system can be time evolved according to the 
 ![](Graphics/liouville.pdf)
 
 
-The first term takes into account the evolution of the system without the presence of the environment, while the second keeps track on the environmental influence of the system [3,4].  Here, the Lindblad operator *D(V)* can be written as 
+The first term takes into account the evolution of the system without the presence of the environment, while the second keeps track of the environmental influence of the system [3,4].  Here, the Lindblad operator *D(V)* can be written as 
 
 ![](Graphics/lindblad.pdf)
 
@@ -61,12 +61,12 @@ There is a number of methods for computing the dynamics of an excitonic system, 
 
 One straightforward implementation is build and diagonalize the Liouville superoperator, and if we use a time-independent Hamiltonian the computational demand scales as <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a> where <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> denotes the number of excitonic sites in the system. 
 
-The most time expensive part of the calculation is hereby the computation of the Lindblad operator acting on the density matrix, which model the transition between excitonic states in the system mediated by the environment. But the overall scaling of the method can be reduced by combining particular parts of the computation [5].
+The most time expensive part of the calculation is hereby the computation of the Lindblad operator acting on the density matrix, which models the transition between excitonic states in the system mediated by the environment. But the overall scaling of the method can be reduced by combining particular parts of the computation [5].
 
 
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Methodology
-Our first approach will be implement a serial version of the
+Our first approach will be to implement a serial version of the
 solver with a variety of numerical implementations to
 perform the time propagations, including different numbers 
 of vibrational states in the bath.
