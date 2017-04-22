@@ -23,26 +23,26 @@
 
 
 // params ... [lambda_0, 1/nu_0, Omega_0, lambda_1, 1/nu_1, Omega_1, ...]
-double _spectral_density(int j, double omega, double *params, int num_params) {
+double _spectral_density(int j, double omega, double **params, int num_params) {
 	double lambda, nu, omega_shift;
 	double spec_dens; 
-	lambda      = params[3 * j];
-	nu          = 1/params[3 * j + 1] * fs1_to_cm1;
-	omega_shift = params[3 * j + 2];
+	lambda      = params[j][0];
+	nu          = 1/params[j][1] * fs1_to_cm1;
+	omega_shift = params[j][2];
 	spec_dens  = nu * lambda * omega / (nu * nu + (omega - omega_shift) * (omega - omega_shift));
 	spec_dens += nu * lambda * omega / (nu * nu + (omega + omega_shift) * (omega + omega_shift));
-//	printf("spec_dens %.5f\n", spec_dens);
 	return spec_dens;
 }
 
 
-double _spectral_density_derivative(int j, double omega, double *params, int num_params) {
+double _spectral_density_derivative(int j, double omega, double **params, int num_params) {
 // params ... [lambda_0, 1/nu_0, Omega_0, lambda_1, 1/nu_1, Omega_1, ...]
 	double lambda, nu, omega_shift;
-	lambda      = params[3 * j];
-	nu          = 1/params[3 * j + 1] * fs1_to_cm1;
+	lambda      = params[j][0];
+	nu          = 1/params[j][1] * fs1_to_cm1;
 	return 2 * lambda / nu;
 }
+
 
 
 double _phonon_statistics(double omega) {
@@ -53,22 +53,20 @@ double _phonon_statistics(double omega) {
 }
 
 
-double _get_rate(int j, double omega, double *params, int num_params) {
+
+double _get_rate(int j, double omega, double **params, int num_params) {
 	double result;
-//	printf("omega %.10f\n", omega);
-	if (omega < - 1e-12) {
+	if (omega < -1e-12) {
 		result = 2 * PI * _spectral_density(j, -omega, params, num_params);
 		result *= (_phonon_statistics(-omega) + 1) * cm1_to_fs1;
-//		printf("### %.5f %.5f\n", omega, result);
 		return result;
 	}
 	if (omega > 1e-12) {
 		result = 2 * PI * _spectral_density(j, omega, params, num_params);
 		result *= _phonon_statistics(omega) * cm1_to_fs1;
-//		printf("### %.5f %.5f\n", omega, result) ;
 		return result;
 	}
-	// this is else (I hope)
+//	printf("omega %.10f\n", omega);
 	result = 2 * PI * KB * T * HBAR_INV;
 	result *= _spectral_density_derivative(j, omega, params, num_params);
 	return result;
@@ -76,157 +74,117 @@ double _get_rate(int j, double omega, double *params, int num_params) {
 
 
 
-
 // gammas ... matrix in which rates will be stored
 // params ... array with spectral density parameters
 // energies ... eigenenergies 
 // num_params ... number of spectral density parameter sets
-// Nsites2 ... Nsites + 2
-void get_rates(double *gammas, double *params, double *energies, int num_params, int Nsites2) {
+void get_rates(double ***gammas, double **params,  double *energies, int SIZE) {
 	int unsigned j, M, N;
 	double rate;
-
-//	for (j = 0; j < Nsites2; j++) {
-//		printf("ENERGIES %.10f\n", energies[j]);
-//	}
-
-	// get rates for inter-exciton state transitions
-	for (j = 1; j < Nsites2 - 1; j++) {
-		for (M = 0; M < Nsites2; M++) {
-			for (N = 0; N < Nsites2; N++) {
-
-//				if (energies[M] != 0 && energies[N] != 0) {
-
-				rate = _get_rate(j - 1, energies[M] - energies[N], params, num_params);
-
-//				} else {
-//					rate = 0;
-//				}
-
-
-//				printf("%d %d %.5f %.5f %.5f \n", M, N, energies[M], energies[N], rate);
-				gammas[M + N * Nsites2 + j * Nsites2 * Nsites2] = rate;
+//	printf("getting rates\n");
+	for (j = 0; j < SIZE; j++) {
+		for (M = 0; M < SIZE; M++) {
+			for (N = 0; N < SIZE; N++) {
+//				printf("%d %d %d\n", j, M, N);
+				if (j == 0) {
+					gammas[M][N][j] = 0.;
+//					printf("assigned zero\n");
+				}
+				if (j == SIZE - 1) {
+//					printf("???\n");
+					gammas[M][N][j] = 0.;
+				}
+				if ((j != 0) && (j != SIZE - 1)) {
+//					printf("trying to get rate");
+					rate = _get_rate(j - 1, energies[M] - energies[N], params, SIZE - 2);
+//					printf("rate %d %d %d %.5f\n", j, M, N, rate);
+					gammas[M][N][j] = rate;
+				}
 			}
 		}
 	}
 }
 
 
-#pragma acc routine gang
-void get_V_matrices(double * V, double * eigvects, int N) {
-	double * helper;
-	helper = (double *) malloc(sizeof(double) * N*N);
-	double sum;
+
+void get_V_matrices(double ****V, double **eigVects, int N) {
 	int unsigned i, j, k, l;
-
-	#pragma acc loop parallel independent gang
-	for (i = 0; i < N; i++)
-		#pragma acc loop parallel independent worker 
-		for (j = 0; j < N; j++) 
-			#pragma acc loop parallel independent vector
-			for (k = 0; k < N; k++)
-				#pragma acc loop parallel  independent
-				for (l = 0; l < 3; l++) 
-					V[k + j * N + i * N*N + l * N*N*N] = 0.;
-
-	// V is a tensor of shape SIZE x SIZE x SIZE x 3
-	#pragma acc loop gang
+	double helper[N][N];
+	// set everything to zero
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < N; j++) {
+			for (k = 0; k < N; k++) {
+				V[k][j][i][0] = 0.;
+				V[k][j][i][1] = 0.;
+				V[k][j][i][2] = 0.;
+			}
+		}
+	}
 	for (i = 1; i < N - 1; i++) {
-		// first, we generate |m><m| at position 
-		// gen zero matrix
-		#pragma acc loop parallel independent worker
 		for (j = 0; j < N; j++) {
-			#pragma acc loop parallel independent vector
 			for (k = 0; k < N; k++) {
-				V[k + j * N + i * N*N + 0 * N*N*N] = 0.;
-				V[k + j * N + i * N*N + 1 * N*N*N] = 0.;
-				V[k + j * N + i * N*N + 2 * N*N*N] = 0.;
+				V[k][j][i][0] = 0.;
+				V[k][j][i][1] = 0.;
+				V[k][j][i][2] = 0.;
 			}
 		}
-		// set one position to 1 for |m><m|
-		V[i + i * N + i * N*N + 1 * N*N*N] = 1.;
-		// now rotate eigvect.T * V * eigvect
-		for (j = 0; j < N; j++) {
-			for (k = 0; k < N; k++) {
-				sum = 0;
+		// compute |m><m|
+		V[i][i][i][1] = 1.;
+		// rotate
+		for (k = 0; k < N; k++) {
+			for (j = 0; j < N; j++) {
+				helper[j][k] = 0.;
 				for (l = 0; l < N; l++) {
-					sum += V[j + l * N + i * N*N + N*N*N] * eigvects[l + k * N];
+					helper[j][k] += V[j][l][i][1] * eigVects[l][k];
 				}
-				helper[j + k * N] = sum;
 			}
 		}
-		for (j = 0; j < N; j++) {
-			for (k = 0; k < N; k++) {
-				sum = 0;
+		for (k = 0; k < N; k++) {
+			for (j = 0; j < N; j++) {
+				V[j][k][i][1] = 0.;
 				for (l = 0; l < N; l++) {
-					sum += eigvects[l + j * N] * helper[l + k * N];
+					V[j][k][i][1] += eigVects[l][j] * helper[l][k];
 				}
-				V[j + k * N + i * N*N + N*N*N] = sum;
 			}
 		} // done rotating
 
-	// ---
-
-		// set one position to 1 for |0><m|
-		V[0 + i * N + i * N*N + 0 * N*N*N] = 1.;
-		// now we rotate again
-		for (j = 0; j < N; j++) {
-			for (k = 0; k < N; k++) {
-				sum = 0;
+		// compute |0><m|
+		V[0][i][i][0] = 1.;
+		for (k = 0; k < N; k++) {
+			for (j = 0; j < N; j++) {
+				helper[j][k] = 0.;
 				for (l = 0; l < N; l++) {
-					sum += V[j + l * N + i * N*N + 0 * N*N*N] * eigvects[l + k * N];
+					helper[j][k] += V[j][l][i][0] * eigVects[l][k];
 				}
-				helper[j + k * N] = sum;
 			}
 		}
-		for (j = 0; j < N; j++) {
-			for (k = 0; k < N; k++) {
-				sum = 0;
+		for (k = 0; k < N; k++) {
+			for (j = 0; j < N; j++) {
+				V[j][k][i][0] = 0.;
 				for (l = 0; l < N; l++) {
-					sum += eigvects[l + j * N] * helper[l + k * N];
+					V[j][k][i][0] += eigVects[l][j] * helper[l][k];
 				}
-				V[j + k * N + i * N*N + 0 * N*N*N] = sum;
 			}
 		} // done rotating
 
-	// ---		
-
-		// set one position to 1 for |RC><m|
-		V[(N - 1) + i * N + i * N*N + 2 * N*N*N] = 1.;
-		// now we rotate again
-		for (j = 0; j < N; j++) {
-			for (k = 0; k < N; k++) {
-				sum = 0;
+		// compute |RC><m|
+		V[N - 1][i][i][2] = 1.;
+		for (k = 0; k < N; k++) {
+			for (j = 0; j < N; j++) {
+				helper[j][k] = 0.;
 				for (l = 0; l < N; l++) {
-					sum += V[j + l * N + i * N*N + 2 * N*N*N] * eigvects[l + k * N];
+					helper[j][k] += V[j][l][i][2] * eigVects[l][k];
 				}
-				helper[j + k * N] = sum;
 			}
 		}
-		for (j = 0; j < N; j++) {
-			for (k = 0; k < N; k++) {
-				sum = 0;
+		for (k = 0; k < N; k++) {
+			for (j = 0; j < N; j++) {
+				V[j][k][i][2] = 0.;
 				for (l = 0; l < N; l++) {
-					sum += eigvects[l + j * N] * helper[l + k * N];
+					V[j][k][i][2] += eigVects[l][j] * helper[l][k];
 				}
-				V[j + k * N + i * N*N + 2 * N*N*N] = sum;
 			}
 		} // done rotating
-
-	} 
-
-//	V[i + j * N + k * N*N + (0, 1, 2) * N*N*N]
+	}
 }
-
-
-
-//#pragma acc routine worker
-void get_V(double *V, double *eigvects, int i, int k, int N) {
-        gen_zero_matrix_real(V, N);
-        V[i + k * N] = 1.;
-        // now we need to rotate
-        rotate(V, eigvects, N);
-}
-
-
 
