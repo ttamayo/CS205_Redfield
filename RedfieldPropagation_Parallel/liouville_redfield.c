@@ -63,7 +63,12 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 
  
 //	#pragma acc kernels present(gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])    create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE])
-	#pragma acc data copyin(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])    present(gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])
+	#pragma acc data copyin(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])    present(links_to_target[0:SIZE], links_to_loss[0:SIZE], gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])  create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])  copy(lindblad_real[0:SIZE][0:SIZE])
+
+//present(links_to_target[0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])     create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
+	{
+
+
 	for (m = 1; m < SIZE - 1; m++) {
 
 		#pragma acc loop independent 
@@ -71,7 +76,7 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 			#pragma acc loop independent
 			for (N = 0; N < SIZE; N++) {
 
-				#pragma acc kernels create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
+				#pragma acc kernels   //create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
 				{
 
 				#pragma acc loop independent collapse(2)
@@ -184,7 +189,12 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 
 //	#pragma acc kernels present_or_copyin(gammas[0:SIZE*SIZE*SIZE], all_Vs[0:SIZE*SIZE*SIZE*3], eigVects[0:SIZE*SIZE], links_to_loss[0:SIZE], links_to_target[0:SIZE], V[0:SIZE*SIZE], first_real[0:SIZE*SIZE], second_real[0:SIZE*SIZE], helper[0:SIZE*SIZE]) copyin(rho_real[0:SIZE*SIZE], rho_imag[0:SIZE*SIZE]) copy(lindblad_real[0:SIZE*SIZE], lindblad_imag[0:SIZE*SIZE]) 
 //	#pragma acc loop private(V[0:3*SIZE*SIZE*SIZE], first_real[0:SIZE*SIZE], second_real[0:SIZE*SIZE], helper[0:SIZE*SIZE])
-        #pragma acc kernels present(links_to_loss[0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])    create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
+//        #pragma acc kernels present(links_to_loss[0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])    create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
+
+        #pragma acc kernels //present(links_to_target[0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])     create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
+
+	{
+
 	for (m = 0; m < SIZE; m++) {
 		rate = links_to_loss[m];
 
@@ -293,7 +303,7 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 //    #pragma acc loop private(V[0:3*SIZE*SIZE*SIZE], first_real[0:SIZE*SIZE], second_real[0:SIZE*SIZE], helper[0:SIZE*SIZE])
 
 
-	#pragma acc kernels present(links_to_target[0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])     create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
+//	#pragma acc kernels present(links_to_target[0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][3])     create(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
 	for (m = 0; m < SIZE; m++) {
 		rate = links_to_target[m];
 
@@ -398,8 +408,9 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 		}
 
 	} // end of acc data directive
+	}
 
-
+	}
 }
 
 

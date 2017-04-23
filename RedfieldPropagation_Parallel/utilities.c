@@ -85,7 +85,7 @@ void gen_test_links(double *links_to_loss, double *links_to_target, int N) {
 	}
 	for (i = 1; i < N - 1; i++) {
 		links_to_loss[i] = 0.001;
-		links_to_target[2] = 0.005;
+		links_to_target[1] = 0.005;
 	}
 }
 

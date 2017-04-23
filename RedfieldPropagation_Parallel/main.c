@@ -10,7 +10,7 @@
 
 /**********************************************************************/
 
-#define NSITES 16
+#define NSITES 48
 #define dt 1.0
 #define number_of_steps 10
 
