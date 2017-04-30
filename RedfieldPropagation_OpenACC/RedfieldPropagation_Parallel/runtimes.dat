@@ -1,0 +1,9 @@
+# all measurements taken for 1000 integration steps
+# hamiltonian size | runtime [s]
+2	0.136
+3	0.497
+4	1.459
+5	3.615
+6	7.867
+7	15.790
+8	30.334

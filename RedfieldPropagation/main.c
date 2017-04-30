@@ -12,32 +12,30 @@
 
 #define NSITES 6
 #define dt 1.0
-#define number_of_steps 1000
 
 /**********************************************************************/
 
 
 int main(void) {
-	printf("# starting\n");
 	int unsigned i, j, k;
 	double tic, toc;
 	int SIZE;
 	SIZE = NSITES + 2;
-	printf("# SIZE %d\n", SIZE);
 
-	double *A, *D, *gammas, *params, *links_to_loss, *links_to_target;
+	double *A, *D, *V, *gammas, *params, *links_to_loss, *links_to_target;
 	A               = (double *) malloc(sizeof(double) * SIZE * SIZE);
 	D               = (double *) malloc(sizeof(double) * SIZE * SIZE);
+	V               = (double *) malloc(sizeof(double) * SIZE * SIZE);
 	gammas          = (double *) malloc(sizeof(double) * SIZE*SIZE*SIZE);
 	params          = (double *) malloc(sizeof(double) * 3 * (SIZE - 2));
 	links_to_loss   = (double *) malloc(sizeof(double) * SIZE);
 	links_to_target = (double *) malloc(sizeof(double) * SIZE);
 
 
+
 	gen_random_hamiltonian_real(A, SIZE);
 	gen_test_spec_densities(params, NSITES);
 	gen_test_links(links_to_loss, links_to_target, SIZE);
-
 
 	double *rho_real, *rho_imag, *helper_matrix;
 	rho_real      = (double *) malloc(sizeof(double) * SIZE * SIZE);
@@ -46,13 +44,14 @@ int main(void) {
 	gen_zero_matrix_complex(rho_real, rho_imag, SIZE);
 	rho_real[1 + 1 * SIZE] = 1.;
 
-	double *all_Vs;
-	all_Vs = (double *) malloc(sizeof(double) * SIZE*SIZE*SIZE*3);
+//	print_matrix_real(A, SIZE);
+//	exit(1);
+
+//	print_matrix_real(rho_real, SIZE);
 
 	// diagonalize hamiltonian
 	diagonalize(A, D, SIZE);
 	// get rates in site basis
-	get_V_matrices(all_Vs, A, SIZE);	
 	get_rates(gammas, params, D, NSITES, SIZE);
 	// rotate rho into exciton basis
 	rotate(rho_real, A, SIZE);
@@ -79,80 +78,85 @@ int main(void) {
 	h1_real = (double *) malloc(sizeof(double) * SIZE * SIZE);
 	h1_imag = (double *) malloc(sizeof(double) * SIZE * SIZE);
 
-	int unsigned step;
+
+	int unsigned step, number_of_steps;
+	number_of_steps = 1000;
+
 	tic = clock();
 
-	#pragma acc data copy(rho_real[0:SIZE*SIZE], rho_imag[0:SIZE*SIZE]) copy(links_to_loss[0:SIZE], links_to_target[0:SIZE], D[0:SIZE], A[0:SIZE*SIZE], gammas[0:SIZE*SIZE*SIZE], all_Vs[0:SIZE*SIZE*SIZE*3]) copy(k1_real[0:SIZE*SIZE], k1_imag[0:SIZE*SIZE], k2_real[0:SIZE*SIZE], k2_imag[0:SIZE*SIZE], k3_real[0:SIZE*SIZE], k3_imag[0:SIZE*SIZE], k4_real[0:SIZE*SIZE], k4_imag[0:SIZE*SIZE], h1_real[0:SIZE*SIZE], h1_imag[0:SIZE*SIZE], comm_real[0:SIZE*SIZE], comm_imag[0:SIZE*SIZE], lindblad_real[0:SIZE*SIZE], lindblad_imag[0:SIZE*SIZE]) 
 	for (step = 0; step < number_of_steps; step++){
 
 		// implementing a 4th order runge kutta scheme here
+		// get k1
+		get_density_update(rho_real, rho_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
 
-		//=== get k1 ===//
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k1_real, k1_imag, SIZE);
 
-		get_density_update(rho_real, rho_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, SIZE);
+		// get k2
+		matrix_mul_scalar(k1_real, dt/2., SIZE);
+		matrix_mul_scalar(k1_imag, dt/2., SIZE);
+		matrix_add_complex(rho_real, rho_imag, k1_real, k1_imag, h1_real, h1_imag, SIZE);
+		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
 
-		for (i = 0; i < SIZE; i++) {
-			for (j = 0; j < SIZE; j++) {
-				k1_real[i + j * SIZE] = (comm_real[i + j * SIZE] + lindblad_real[i + j * SIZE]) * dt / 2.;
-				k1_imag[i + j * SIZE] = (comm_imag[i + j * SIZE] + lindblad_imag[i + j * SIZE]) * dt / 2.;
-				h1_real[i + j * SIZE] = rho_real[i + j * SIZE] + k1_real[i + j * SIZE];
-				h1_imag[i + j * SIZE] = rho_imag[i + j * SIZE] + k1_imag[i + j * SIZE];
-			}
-		}
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k2_real, k2_imag, SIZE);
 
-		//=== get k2 ===//
+		// get k3
+		matrix_mul_scalar(k2_real, dt/2., SIZE);
+		matrix_mul_scalar(k2_imag, dt/2., SIZE);
+		matrix_add_complex(rho_real, rho_imag, k2_real, k2_imag, h1_real, h1_imag, SIZE);
+		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
 
-		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, SIZE);
-
-		for (i = 0; i < SIZE; i++) {
-			for (j = 0; j < SIZE; j++) {
-				k2_real[i + j * SIZE] = (comm_real[i + j * SIZE] + lindblad_real[i + j * SIZE]) * dt / 2.;
-				k2_imag[i + j * SIZE] = (comm_imag[i + j * SIZE] + lindblad_imag[i + j * SIZE]) * dt / 2.;
-				h1_real[i + j * SIZE] = rho_real[i + j * SIZE] + k2_real[i + j * SIZE];
-				h1_imag[i + j * SIZE] = rho_imag[i + j * SIZE] + k2_imag[i + j * SIZE];
-			}
-		}
-
-		//=== get k3 ===//
-
-		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, SIZE);
-
-		for (i = 0; i < SIZE; i++) {
-			for (j = 0; j < SIZE; j++) {
-				k3_real[i + j * SIZE] = (comm_real[i + j * SIZE] + lindblad_real[i + j * SIZE]) * dt;
-				k3_imag[i + j * SIZE] = (comm_imag[i + j * SIZE] + lindblad_imag[i + j * SIZE]) * dt;
-				h1_real[i + j * SIZE] = rho_real[i + j * SIZE] + k3_real[i + j * SIZE];
-				h1_imag[i + j * SIZE] = rho_imag[i + j * SIZE] + k3_imag[i + j * SIZE];
-			}
-		}
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k3_real, k3_imag, SIZE);
 		
-		//=== get k4 ===//
+		// get k4
+		matrix_mul_scalar(k3_real, dt, SIZE);
+		matrix_mul_scalar(k3_imag, dt, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k3_real, k3_imag, h1_real, h1_imag, SIZE);
+		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, SIZE);
 
-		get_density_update(h1_real, h1_imag, D, comm_real, comm_imag, gammas, A, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, SIZE);
+//		gen_zero_matrix_complex(lindblad_real, lindblad_imag, SIZE);
+		matrix_add_complex(comm_real, comm_imag, lindblad_real, lindblad_imag, k4_real, k4_imag, SIZE);
+		
+		// summary:
+		// we computed k1 * dt / 2., k2 * dt / 2., k3 * dt, k4
 
-		//=== combine everyting and update rho ===//
+		// now we update the density
+		// the update comprises of k1 * dt / 6., k2 * dt / 3., k3 * dt / 3., k4 * dt / 6.
+		matrix_mul_scalar(k1_real, 1/3., SIZE);
+		matrix_mul_scalar(k1_imag, 1/3., SIZE);
+		matrix_mul_scalar(k2_real, 2/3., SIZE);
+		matrix_mul_scalar(k2_imag, 2/3., SIZE);
+		matrix_mul_scalar(k3_real, 1/3., SIZE);
+		matrix_mul_scalar(k3_imag, 1/3., SIZE);
+		matrix_mul_scalar(k4_real, dt / 6., SIZE);
+		matrix_mul_scalar(k4_imag, dt / 6., SIZE);
 
-		for (i = 0; i < SIZE; i++) {
-			for (j = 0; j < SIZE; j++) {
-				rho_real[i + j * SIZE] += k1_real[i + j * SIZE] / 3. + 2 * k2_real[i + j * SIZE] / 3. + k3_real[i + j * SIZE] / 3. + (comm_real[i + j * SIZE] + lindblad_real[i + j * SIZE]) * dt / 6.;
-				rho_imag[i + j * SIZE] += k1_imag[i + j * SIZE] / 3. + 2 * k2_imag[i + j * SIZE] / 3. + k3_imag[i + j * SIZE] / 3. + (comm_imag[i + j * SIZE] + lindblad_imag[i + j * SIZE]) * dt / 6.;
-			}
-		}
+		matrix_add_complex(rho_real, rho_imag, k1_real, k1_imag, rho_real, rho_imag, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k2_real, k2_imag, rho_real, rho_imag, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k3_real, k3_imag, rho_real, rho_imag, SIZE);
+		matrix_add_complex(rho_real, rho_imag, k4_real, k4_imag, rho_real, rho_imag, SIZE);
 
 		// done with Runge Kutta step
 
-		//FIXME: In principle, we can keep integrating and rotate back on a different device?
 
 		transpose(A, SIZE);
 		rotate(rho_real, A, SIZE);
 		rotate(rho_imag, A, SIZE);
 		transpose(A, SIZE);
 
-		printf("%d ", step);
-		for (i = 0; i < SIZE; i++) {
-			printf("%.10f ", rho_real[i + i * SIZE]);
-		}
-		printf("\n");
+//		printf("new rho:\n");
+//		print_matrix_real(rho_real, SIZE);
+//		printf("... and ...\n");
+//		print_matrix_real(rho_imag, SIZE);
+
+//		printf("%d ", step);
+//		for (i = 0; i < SIZE; i++) {
+//			printf("%.10f ", rho_real[i + i * SIZE]);
+//		}
+//		printf("\n");
 
 		rotate(rho_real, A, SIZE);
 		rotate(rho_imag, A, SIZE);
@@ -174,4 +178,10 @@ int main(void) {
     printf("# Time Elapsed: %f seconds\n\n", time_spent);
 
 	return 0;
+
+	// FIXME
+	// not sure why this should be after the return command
+	// putting this line before the return raises an error 
+//	free((void*) A);
+
 }

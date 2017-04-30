@@ -9,9 +9,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import interpolate
 
-sns.set_context('paper', font_scale = 2.0, rc = {'lines.linewidth': 3})
-
-
 # for reproducibility
 np.random.seed(100691)
 
@@ -41,7 +38,7 @@ beta = 1 / (kB * temperature)		# 1 / cm-1
 
 #=============================================================================
 
-shape = 8
+shape = 2
 
 # initialize hamiltonian as (|0>, |1>, ..., |n>, |RC>)
 hamiltonian = np.zeros((shape + 2, shape + 2), dtype = np.complex128)
@@ -167,8 +164,8 @@ class RedfieldPropagator(object):
 			rm_V_dagg[0, m, 0, :, :] = np.conj(np.transpose(V))
 			rm_V_dagg_V[0, m, 0, :, :] = rate * np.dot(np.conj(np.transpose(V)), V)
 
-#		print rm_V
-#		quit()
+		print rm_V
+		quit()
 
 		self.rm_V        = rm_V
 		self.rm_V_dagg   = rm_V_dagg
@@ -226,7 +223,7 @@ if __name__ == '__main__':
 
 	print 'Elapsed time: %.5f s' % (time.time() - start)
 
-#	quit()
+	quit()
 
 	for i in range(hamiltonian.shape[0]):
 		if 0 < i < hamiltonian.shape[0] - 1:
@@ -234,11 +231,10 @@ if __name__ == '__main__':
 		else:
 			ls = '--'
 		plt.plot(timeDomain, np.real(propagator.populations[:, i]), label = i, lw = 3, ls = ls)
-#	plt.plot(timeDomain, np.real(np.sum(propagator.populations, axis = 1)), label = 'total')
+	plt.plot(timeDomain, np.real(np.sum(propagator.populations, axis = 1)), label = 'total')
 	plt.xlabel('Time [fs]')
 	plt.ylabel('Population')
-	plt.legend(ncol = 4, loc = 'best')
-	plt.savefig('population_python.png', bbox_inches = 'tight')
+	plt.legend()
 	plt.show()
 
 

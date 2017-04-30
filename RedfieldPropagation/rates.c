@@ -6,7 +6,7 @@
 
 // internal modules 
 #include "headers.h"
-//#include "matrix_generators.h"
+
 
 #define cm1_to_fs1 1. / 33356.40952
 #define fs1_to_cm1 33356.40952
@@ -53,7 +53,6 @@ double _phonon_statistics(double omega) {
 }
 
 
-
 double _get_rate(int j, double omega, double *params, int num_params) {
 	double result;
 //	printf("omega %.10f\n", omega);
@@ -91,18 +90,19 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 //		printf("ENERGIES %.10f\n", energies[j]);
 //	}
 
+//	exit(1);
 	// get rates for inter-exciton state transitions
 	for (j = 1; j < Nsites2 - 1; j++) {
 		for (M = 0; M < Nsites2; M++) {
 			for (N = 0; N < Nsites2; N++) {
 
-//				if (energies[M] != 0 && energies[N] != 0) {
+				if (energies[M] != 0 && energies[N] != 0) {
 
 				rate = _get_rate(j - 1, energies[M] - energies[N], params, num_params);
 
-//				} else {
-//					rate = 0;
-//				}
+				} else {
+					rate = 0;
+				}
 
 
 //				printf("%d %d %.5f %.5f %.5f \n", M, N, energies[M], energies[N], rate);
@@ -113,142 +113,17 @@ void get_rates(double *gammas, double *params, double *energies, int num_params,
 }
 
 
-//#pragma acc routine gang
-void get_V_matrices(double *V, double *eigvects, int N) {
-//	double* restrict helper;
-//	helper = (double *) malloc(sizeof(double) * N*N);
-	double helper[N*N];
-	double sum;
-	int unsigned i, j, k, l;
 
-	#pragma acc loop parallel independent gang
-//	#pragma acc kernels copy(V[0:N*N*N*3])
-	for (i = 0; i < N; i++)
-		#pragma acc loop parallel independent worker 
-		for (j = 0; j < N; j++) 
-			#pragma acc loop parallel independent vector
-			for (k = 0; k < N; k++)
-//				#pragma acc loop parallel independent
-//				for (l = 0; l < 3; l++) 
-				V[k + j * N + i * N*N + 0 * N*N*N] = 0.;
-				V[k + j * N + i * N*N + 1 * N*N*N] = 0.;
-				V[k + j * N + i * N*N + 2 * N*N*N] = 0.;
-
-	// V is a tensor of shape SIZE x SIZE x SIZE x 3
-//	#pragma acc data copyin(helper[0:N*N]) copy(V[0:3*N*N*N], eigvects[0:N*N])
-//	#pragma acc loop gang
-	#pragma acc kernels copyin(helper[0:N*N]) copy(V[0:3*N*N*N], eigvects[0:N*N])
-	for (i = 1; i < N - 1; i++) {
-		// first, we generate |m><m| at position 
-		// gen zero matrix
-		#pragma acc loop parallel independent worker
-		for (j = 0; j < N; j++) {
-			#pragma acc loop parallel independent vector
-			for (k = 0; k < N; k++) {
-				V[k + j * N + i * N*N + 0 * N*N*N] = 0.;
-				V[k + j * N + i * N*N + 1 * N*N*N] = 0.;
-				V[k + j * N + i * N*N + 2 * N*N*N] = 0.;
-			}
-		}
-		// set one position to 1 for |m><m|
-		V[i + i * N + i * N*N + 1 * N*N*N] = 1.;
-		// now rotate eigvect.T * V * eigvect
-		#pragma acc loop parallel independent worker
-		for (k = 0; k < N; k++) {
-			#pragma acc loop parallel independent vector
-			for (j = 0; j < N; j++) {
-				helper[j + k * N] = 0;
-//				#pragma acc loop parallel independent seq
-				for (l = 0; l < N; l++) {
-					helper[j + k * N] += V[j + l * N + i * N*N + N*N*N] * eigvects[l + k * N];
-				}
-			}
-		}
-		#pragma acc loop parallel independent worker
-		for (k = 0; k < N; k++) {
-			#pragma acc loop parallel independent vector
-			for (j = 0; j < N; j++) {
-				V[j + k * N + i * N*N + N*N*N] = 0;
-//				#pragma acc loop parallel independent  seq
-				for (l = 0; l < N; l++) {
-					V[j + k * N + i * N*N + N*N*N] += eigvects[l + j * N] * helper[l + k * N];
-				}
-			}
-		} // done rotating
-
-	// ---
-
-		// set one position to 1 for |0><m|
-		V[0 + i * N + i * N*N + 0 * N*N*N] = 1.;
-		// now we rotate again
-		#pragma acc loop parallel independent worker
-		for (k = 0; k < N; k++) {
-			#pragma acc loop parallel independent vector
-			for (j = 0; j < N; j++) {
-				helper[j + k * N] = 0;
-//				#pragma acc loop parallel independent seq	
-				for (l = 0; l < N; l++) {
-					helper[j + k * N] += V[j + l * N + i * N*N + 0 * N*N*N] * eigvects[l + k * N];
-				}
-			}
-		}
-		#pragma acc loop parallel independent worker
-		for (k = 0; k < N; k++) {
-			#pragma acc loop parallel independent vector
-			for (j = 0; j < N; j++) {
-				V[j + k * N + i * N*N] = 0;
-//				#pragma acc loop parallel independent seq
-				for (l = 0; l < N; l++) {
-					V[j + k * N + i * N*N] += eigvects[l + j * N] * helper[l + k * N];
-				}
-			}
-		} // done rotating
-
-	// ---		
-
-		// set one position to 1 for |RC><m|
-		V[(N - 1) + i * N + i * N*N + 2 * N*N*N] = 1.;
-		// now we rotate again
-//		#pragma acc loop parallel independent worker
-//		#pragma acc kernels //present(helper[0:N*N])
-		for (k = 0; k < N; k++) {
-//			#pragma acc loop parallel independent vector
-			#pragma acc loop independent
-			for (j = 0; j < N; j++) {
-				helper[j + k * N] = 0;
-//				#pragma acc loop parallel independent seq
-				#pragma acc loop independent private(helper[0:N*N])
-				for (l = 0; l < N; l++) {
-					helper[j + k * N] += V[j + l * N + i * N*N + 2 * N*N*N] * eigvects[l + k * N];
-				}
-			}
-		}
-//		#pragma acc kernels //present(V[0:3*N*N*N])
-		for (k = 0; k < N; k++) {
-//			#pragma acc loop independent
-			for (j = 0; j < N; j++) {
-				V[j + k * N + i * N*N + 2 * N*N*N] = 0;
-//				#pragma acc loop independent private(V[0:3*N*N*N])
-				for (l = 0; l < N; l++) {
-					V[j + k * N + i * N*N + 2 * N*N*N] += eigvects[l + j * N] * helper[l + k * N];
-				}
-			}
-		} // done rotating
-
-	} 
-
-//	V[i + j * N + k * N*N + (0, 1, 2) * N*N*N]
-}
-
-
-
-//#pragma acc routine worker
 void get_V(double *V, double *eigvects, int i, int k, int N) {
-        gen_zero_matrix_real(V, N);
-        V[i + k * N] = 1.;
-        // now we need to rotate
-        rotate(V, eigvects, N);
+	gen_zero_matrix_real(V, N);
+	V[i + k * N] = 1.;
+	// now we need to rotate
+	rotate(V, eigvects, N);
 }
 
 
-
+void get_V_dagg(double *V, double *eigvects, int i, int k, int N) {
+	gen_zero_matrix_real(V, N);
+	V[k + i * N] = 1.;
+	rotate(V, eigvects, N);
+}

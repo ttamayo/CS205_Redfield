@@ -14,22 +14,15 @@
 #include <time.h>
 
 #include "headers.h"
-//#include "multiple_matrix_operations.h"
+
 
 /* ----------------------------------------------------------- */
 // operations on matrix and scalars
-//#pragma acc routine worker
-void matrix_mul_scalar(double *A, double scalar, int N) {
+ void matrix_mul_scalar(double *A, double scalar, int N) {
  	int unsigned i, j;
-//	#pragma acc data present_or_copy(A[0:N*N])
-//	#pragma acc loop worker, vector
-//	#pragma acc kernels
-//	#pragma acc loop independent
  	for (i = 0; i < N; i++)
-//                #pragma acc loop independent
-		//#pragma acc loop worker, vector
  		for (j = 0; j < N; j++)
- 			A[j + i * N] *= scalar;
+ 			A[i + j * N] *= scalar;
  }
 
 
@@ -37,44 +30,33 @@ void matrix_mul_scalar(double *A, double scalar, int N) {
 // matrix operations on real valued matrices
 
 // adding two real valued matrices C = A + B (naive implementation)
-//#pragma acc routine worker
 void matrix_add_real(double *A, double *B, double *C, int N) {
 	int unsigned i, j;
-//	#pragma acc data present_or_copyin(A[0:N*N], B[0:N*N]) present_or_copy(C[0:N*N])
-//	#pragma acc loop independent
 	for (i = 0; i < N; i++) 
-//		#pragma acc loop independent
 		for (j = 0; j < N; j++) 
-			C[j + i * N] = A[j + i * N] + B[j + i * N];
+			C[i + j * N] = A[i + j * N] + B[i + j * N];
 }
 
 // subtracting two real valued matrices C = A - B (naive implementation)
-//#pragma acc routine worker
 void matrix_sub_real(double *A, double *B, double *C, int N) {
 	int unsigned i, j;
-//	#pragma acc data present_or_copyin(A[0:N*N], B[0:N*N]) present_or_copy(C[0:N*N])
-//	#pragma acc loop independent
 	for (i = 0; i < N; i++) 
-//		#pragma acc loop independent
 		for (j = 0; j < N; j++) 
-			C[j + i * N] = A[j + i * N] - B[j + i * N];
+			C[i + j * N] = A[i + j * N] - B[i + j * N];
 }
 
 // multiplying two real valued matrices C = AB (naive implementation)
-//#pragma acc routine worker
 void matrix_mul_real(double *A, double *B, double *C, int N) {
 	int unsigned i, j, k;
 	double sum;
-//	#pragma acc data present_or_copyin(A[0:N*N], B[0:N*N]) present_or_copy(C[0:N*N])
-//	#pragma acc loop worker
 	for (i = 0; i < N; i++) {
-//		#pragma acc loop worker, vector
 		for (j = 0; j < N; j++) {
 			sum = 0.;
-//			#pragma acc loop worker, vector
 			for (k = 0; k < N; k++) {
 				sum += A[i + k * N] * B[k + j * N];
+//				printf("%.16f %.16f %.16f\n", A[i + k * N], B[k + j * N], sum);
 			}
+//			printf("sum %.16f\n", sum);
 			C[i + j * N] = sum;
 		}
 	}
@@ -82,11 +64,11 @@ void matrix_mul_real(double *A, double *B, double *C, int N) {
 
 /* ----------------------------------------------------------- */
 
-
 void matrix_add_complex(double *A_real, double *A_imag, double *B_real, double *B_imag, double *C_real, double *C_imag, int N) {
 	matrix_add_real(A_real, B_real, C_real, N);
 	matrix_add_real(A_imag, B_imag, C_imag, N);
 }
+
 
 /* matrix multiplication for complex matrices C = AB 
  * suppose A = a + ib and B = c + id, then
@@ -101,22 +83,13 @@ void matrix_add_complex(double *A_real, double *A_imag, double *B_real, double *
  * --> we expect a speed up for large matrices
  *
  */
-//#pragma acc routine gang
 void matrix_mul_complexified(double *A_real, double *A_imag, double *B_real, double *B_imag, double *C_real, double *C_imag, int N) {
-
-//	#pragma acc data copy(A_real) create(helper_matrix)
-
 	double *helper_matrix;
 	helper_matrix = (double *) malloc(sizeof(double) * (N * N));
 	double *h1, *h2, *h3;
 	h1 = (double *) malloc(sizeof(double) * (N * N));
 	h2 = (double *) malloc(sizeof(double) * (N * N));
 	h3 = (double *) malloc(sizeof(double) * (N * N));
-
-//	#pragma acc data copyin(A_real[0:N*N], A_imag[0:N*N], B_real[0:N*N], B_imag[0:N*N], helper_matrix[0:N*N], h1[0:N*N], h2[0:N*N], h3[0:N*N]) copy(C_real[0:N*N], C_imag[0:N*N])
-
-//	#pragma acc data copyin(A_real[0:N*N], A_imag[0:N*N], B_real[0:N*N], B_imag[0:N*N]) copy(C_real[0:N*N], C_imag[0:N*N]) create(helper_matrix[0:N*N], h1[0:N*N], h2[0:N*N], h3[0:N*N])
-
 
 	// calculate a - b
 	matrix_sub_real(A_real, A_imag, h1, N);
@@ -141,8 +114,6 @@ void matrix_mul_complexified(double *A_real, double *A_imag, double *B_real, dou
 	free((void*) h1);
 	free((void*) h2);
 	free((void*) h3);
-
-//	#pragma end data
 }
 
 /* ----------------------------------------------------------- */

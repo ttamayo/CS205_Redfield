@@ -4,8 +4,8 @@
 #ifndef FUNC_LIOUVILLE_INCLUDED
 	#define FUNC_LIOUVILLE_INCLUDED
 	void hamiltonian_commutator(double **rho_real, double **rho_imag, double *hamiltonian, double **comm_real, double **comm_imag, int N);
-	void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, double **eigVects, double **lindblad_real, double **lindblad_imag, double *links_to_loss, double *links_to_target, double ****all_Vs, int SIZE);
-	void get_density_update(double **rho_real, double **rho_imag, double *energies, double **comm_real, double **comm_imag, double ***gammas, double **eigvects, double **lindblad_real, double **lindblad_imag, double *links_to_loss, double *links_to_target, double ****all_Vs, int N); 
+	void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, double **eigVects, double **lindblad_real, double **lindblad_imag, double *links_to_loss, double *links_to_target, double ****all_Vs, double ** V, double **first_real, double **second_real, double **helper, double ***reduction_intermediates,  int SIZE);
+	void get_density_update(double **rho_real, double **rho_imag, double *energies, double **comm_real, double **comm_imag, double ***gammas, double **eigvects, double **lindblad_real, double **lindblad_imag, double *links_to_loss, double *links_to_target, double ****all_Vs, double **V, double **first_real, double **second_real, double **helper, double ***reduction_intermediates, int N); 
 #endif
 
 
