@@ -65,6 +65,13 @@ To better understand the secular Redfield approximation for propagating excitoni
 
 
 <center>
+<img src="files/python_population_euler.png" width="200"><img src="files/runtimes_loglog.png" width="200">
+</center>
+
+**Figure:** Population dynamics in Python with Euler integration (1 fs time step) for four excitonic sites (1 to 4), a loss state (0) and a target state (5). The sum of the population over all states is plotted as a reference (total) and remains constant during the simulation, in agreement with properties of the underlying differential equation. The excited state is quickly distributed among the four sites and then slowly decays into loss and target states. The long term behavior matches the physical expectation of thermalized excited states.
+
+
+<center>
 <img src="files/runtimes.png" width="200"><img src="files/runtimes_loglog.png" width="200">
 </center>
 
@@ -81,62 +88,55 @@ Regarding the Lindblad operator we noticed that the transition matrices are inde
 
 With all these observations for implementing a faster propagation algorithm we are still left with the three dimensional sum in the Lindblad operator, which remains to be the most expensive piece of the algorithm. We therefore focus our parallelization efforts on this part of the equation. 
 
+In addition, we encountered one major problem with the Euler integration scheme. The coupling to the environment causes a dampening of oscillations in the exciton populations. However, without the Lindblad operator term in the equation, the Euler integrator cannot maintain physically reasonable populations between 0 and 1 as shown in the figure below. 
+
+
+<center>
+<img src="files/python_population_euler_going_wrong.png" width="200"><img src="files/runtimes_loglog.png" width="200">
+</center>
+
+**Figure:** Population dynamics in Python with Euler integration (1 fs time step) for four excitonic sites (1 to 4), a loss state (0) and a target state (5) as before, except for zero couplings to the environment. Clearly the Euler integrator cannot maintain physically reasonable population numbers between 0 and 1, which indicates that more sophisticated integration schemes need to be employed for accurate time evolution.
+
+
+
+
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Preparations for a more efficient and more accurate implementation 
+
+
+We observed that a relatively cheap Euler integration scheme is too inaccurate and we identified a number of actions we can take to optimize the algorithm. However, even with the expected improvements from the optimizations we encountered large runtimes in the Python implementation. Along with the implementation of the proposed optimization we therefore also translated the code into C to further improve runtimes. 
+
+In the C implementation we hardcoded most of the operations to save on as many unnecessary operations as possible. The computation of the commutator, for instance, which would usually consist of two multiplications of comlex valued matrices could be reduced to two matrix vector multiplications by diagonalizing the Hamiltonian and setting the complex phase of the Hamiltonian to zero. This is demonstrated in the code listing below. 
+
+```
+for (i = 0; i < SIZE; i++)
+	for (j = 0; j < SIZE; j++) {
+		comm_real[i][j] = (hamiltonian[j] - hamiltonian[i]) * rho_imag[i][j];
+		comm_imag[i][j] = (hamiltonian[i] - hamiltonian[j]) * rho_real[i][j];
+	}
+```
+
+We also precomputed the transition matrices $V$ and implemented matrix transpose operations implictly by using the proper indexing in matrix multiplications. Furthermore we stored as many intermediate results as possible, such as the $V^\dagger V$ term in the Lindblad operator, to avoid unnecessary computations. 
+
+However, due to the inaccurate Euler integration we were also forced to go to a 4th order Runge-Kutta integrator to maintain a reasonable level of accuracy in our calculations. The 4th order Runge-Kutta integrator requires the calculation of four density matrix updated per integration step, but this additional computational cost was compensated by the implemented optimizations. The figure below shows the behavior of the 4th order Runge-Kutta integrator over time. We observe, as expected, that the peak height of the initial site is preserved during the simulation. 
+
+
+<center>
+<img src="files/RungeKutta_test.png" width="400">
+</center> 
+
+**Figure:** Population dynamics in C with 4th order Runge-Kutta integration (1 fs time step) without coupling to the environment. We observe oscillations between the excitonic states as expected and see that the peak in the population of the initial site returns to 1 throughout the course of the simulation as opposed to the Euler integration. 
+
+<center>
+<img src="files/runtimes_C.png" width="400">
+</center> 
+
+**Figure:** Runtimes for 10 Runge-Kutta integration steps of the Redfield equations implemented in C using the features discussed above. We observe a significant performance improvement over the Python implementation. However, due to the scaling of the algorithm ($N^6$) we are still not able to go to larger problem sizes. 
 
 
 
 
 
-
-
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Preparations for a more efficient implementation 
-
-
-
-
-In a naive implementation of the secular Redfield method all appearing matrices, including the Hamiltonian $H$, the density matrix $\rho$ and the transition matrices $V$ would have to implemented as complex valued matrices. All three matrices would be dense and we would have to carry out a number of complex-valued matrix-matrix multiplications. However, it turns out that due to some physical properties of the matrices we can make so simplifications and save a significant number of operations. 
-
-First of all, the Hamiltonian 
-
-
-
-Our first approach will be implement a serial version of the
-solver with a variety of numerical implementations to
-perform the time propagations, including different numbers 
-of vibrational states in the bath.
-Later, we explore different parallelization schemes
-with hybrid architectures.
-Finally, we will compare our results with an state-of-the-art 
-implementation of hierarchical equations of motion [6,7].
-
-
-There are a wide variety of methods that can obtain the exciton dynamics, some of them
-departs on the Redfield equations.
-One straightforward implementation is build and diagonalize the Liouville superoperator,
-and if we use a time-independent Hamiltonian, the compuational effor scales 
-<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a>
- where <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a>, 
-is the number of the basis of vibrational states.
-This strategy can be numericall unstable in some case.
-Finally, there are other approaches where by rewritting the Redfield equation and making futher
-approximation, there is only needed matrix-matrix multiplications, hence the computational time scales
-is 
-<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^3" title="N^3" /></a>[5].
-
-
-
-
-
-
-
-
-
-## <i class="fa fa-check-square" aria-hidden="true"></i>  C implementations
-
-Due to the computational demand of a Python implementation we quickly realized that our integration scheme will benefit from switching to numerically more efficient languages such as C. 
-
-
-
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Parallelizing Redfield for GPUs: OpenACC implementation 
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Towards an accelerated implementation: Computing Redfield in the SIMT model
 
 Encouraged by the speed up we already observed by translating the code from Python to C we wanted to make use of the computational power of GPUs and speed up the code even further by parallelizing the propagation step, in particular the highly demanding computation of the Lindblad operator term in the Redfield equation. 
 

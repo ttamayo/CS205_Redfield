@@ -650,7 +650,7 @@ void get_density_update(double **rho_real, double **rho_imag, double *energies, 
 
 //	#pragma acc update host(lindblad_real[0:N][0:N])
 //	print_matrix_real(rho_real, N);
-	lindblad_operator(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, N);
+//	lindblad_operator(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, N);
 //	exit(1);
 //	#pragma acc update device(lindblad_real[0:N][0:N])
 //	print_matrix_real(lindblad_real, N);

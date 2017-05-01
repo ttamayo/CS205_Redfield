@@ -24,14 +24,14 @@ print len(values[1])
 
 for i in range(1, values.shape[1]):
 	if i == 2 or values.shape[1] - 1:
-		ls = '--'
+		ls = '-'
 	else:
 		ls = '-'
 	print i
 	plt.plot(values[:, 0], values[:, i],  ls = ls)
 plt.plot(values[:, 0], np.sum(values[:, 1:], axis = 1), label = 'Total')
 
-plt.legend(loc = 'best')
+#plt.legend(loc = 'best')
 plt.xlabel('Time [fs]')
 plt.ylabel('Population')
 

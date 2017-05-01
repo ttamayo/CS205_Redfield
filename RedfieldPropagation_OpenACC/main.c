@@ -11,9 +11,9 @@
 /**********************************************************************/
 
 #define BLOCK_SIZE 16
-#define NSITES 62
+#define NSITES 4
 #define dt 1.0
-#define number_of_steps 10
+#define number_of_steps 2000
 
 /**********************************************************************/
 
@@ -147,7 +147,7 @@ int main(void) {
 	int unsigned step;
 	tic = clock();
 
-	printf("started propagation\n");
+	printf("# started propagation\n");
 
 //	#pragma acc data copyin(hamiltonian[0:SIZE], eigVects[0:SIZE][0:SIZE], links_to_target[0:SIZE], links_to_loss[0:SIZE], gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3])   copyin(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])   copyin(h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE], k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE])    copyin(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])     copy(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])    create(reduction_intermediates[0:SIZE][0:SIZE][0:SIZE][0:SIZE][0:SIZE])
 //	#pragma acc data copyin(hamiltonian[0:SIZE])
