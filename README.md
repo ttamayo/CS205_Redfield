@@ -7,7 +7,7 @@ The critical process of energy harvesting in solar cells is to quickly convert e
 
 
 <center>
-<img src="files/FMO.png" width="200">
+<img src="files/FMO.png" width="400">
 </center> 
 
 
@@ -27,23 +27,19 @@ The dynamics of excited states can be described in terms of the time evolution o
 
 The Redfield approximation furthermore assumes a weak coupling between the system and the bath. With the additional approximation that only certain resonant modes couple between the system and the bath we can then finally write a master equation for excited state energy time evolution in the form of a Lindblad equation. 
 
-Considering a system with $N$ sites and a Hamiltonian $H$, the time evolution of the density matrix $\rho(t)$ in the Redfield master equation is defined as 
+Considering a system with <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> sites and a Hamiltonian <a href="https://www.codecogs.com/eqnedit.php?latex=H" target="_blank"><img src="https://latex.codecogs.com/gif.latex?H" title="H" /></a>, the time evolution of the density matrix <a href="https://www.codecogs.com/eqnedit.php?latex=\rho(t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\rho(t)" title="\rho(t)" /></a> in the Redfield master equation is defined as 
 
-$$
-\frac{d\rho(t)}{dt} = - \frac{i}{\hbar} \left[ H, \rho(t) \right] + \sum\limits_{m,M,N} \gamma(\omega_{MN}) \left( V_m(\omega_{MN}) \rho(t) V^\dagger_m(\omega_{MN}) - \frac{1}{2} V_m^\dagger(\omega_{MN}) V_m(\omega_{MN}) \rho(t) - \frac{1}{2} \rho(t) V^\dagger_m(\omega_{MN}) V_m(\omega_{MN}) \right )
-$$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{d\rho(t)}{dt}&space;=&space;-&space;\frac{i}{\hbar}&space;\left[&space;H,&space;\rho(t)&space;\right]&space;&plus;&space;\sum\limits_{m,M,N}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{d\rho(t)}{dt}&space;=&space;-&space;\frac{i}{\hbar}&space;\left[&space;H,&space;\rho(t)&space;\right]&space;&plus;&space;\sum\limits_{m,M,N}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" title="\frac{d\rho(t)}{dt} = - \frac{i}{\hbar} \left[ H, \rho(t) \right] + \sum\limits_{m,M,N} \gamma(\omega_{MN}) \left( V_m(\omega_{MN}) \rho(t) V^\dagger_m(\omega_{MN}) - \frac{1}{2} V_m^\dagger(\omega_{MN}) V_m(\omega_{MN}) \rho(t) - \frac{1}{2} \rho(t) V^\dagger_m(\omega_{MN}) V_m(\omega_{MN}) \right )" /></a>
 
-where $\gamma$ denotes transition rates between the excitonic states in the system and $V$ are transition matrices defined as
+where <a href="https://www.codecogs.com/eqnedit.php?latex=\gamma" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\gamma" title="\gamma" /></a> denotes transition rates between the excitonic states in the system and <a href="https://www.codecogs.com/eqnedit.php?latex=V" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V" title="V" /></a> are transition matrices defined as
 
-$$
-V_m(\omega) = \sum\limits_{\omega, M, N} c^*_m(M) c_m(N) |M \rangle \langle N | \delta(\omega\hbar - E_M + E_N)
-$$
+<a href="https://www.codecogs.com/eqnedit.php?latex=V_m(\omega)&space;=&space;\sum\limits_{\omega,&space;M,&space;N}&space;c^*_m(M)&space;c_m(N)&space;|M&space;\rangle&space;\langle&space;N&space;|&space;\delta(\omega\hbar&space;-&space;E_M&space;&plus;&space;E_N)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V_m(\omega)&space;=&space;\sum\limits_{\omega,&space;M,&space;N}&space;c^*_m(M)&space;c_m(N)&space;|M&space;\rangle&space;\langle&space;N&space;|&space;\delta(\omega\hbar&space;-&space;E_M&space;&plus;&space;E_N)" title="V_m(\omega) = \sum\limits_{\omega, M, N} c^*_m(M) c_m(N) |M \rangle \langle N | \delta(\omega\hbar - E_M + E_N)" /></a>
 
 The first term of the differential equation for the density matrix accounts for the time evolution of the excitonic system alone while the second term is used to compute the influence of the environment on the dynamics of the excitonic system. 
 
 Solving this form of the Redfield master equation numerically involves a number of matrix operations. Due to the summation in the second term of the differential equation, from hereon referred to as the Lindblad operator term, a naive algorithm is expected to scale as <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a> with <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> the number of sites in the system.  
 
-In addition to the interaction between the excitonic sites and the interaction between the excitonic sites and the environment we also need to model two more phenomena: the decay of excited states back to the ground state and the decay of an excited state into the target state, where charge separation takes place. Both of these effects, however, can easily be incorporated into the established formalism by adding two additional states to the density matrix, one for the molecular ground state (loss state) and one for the exciton transfer target (target state). The size of all implemented matrices is therefore always $N + 2$, with $N$ excitonic states, one loss state and one target state. 
+In addition to the interaction between the excitonic sites and the interaction between the excitonic sites and the environment we also need to model two more phenomena: the decay of excited states back to the ground state and the decay of an excited state into the target state, where charge separation takes place. Both of these effects, however, can easily be incorporated into the established formalism by adding two additional states to the density matrix, one for the molecular ground state (loss state) and one for the exciton transfer target (target state). The size of all implemented matrices is therefore always <img src="https://latex.codecogs.com/gif.latex?N&plus;2" title="N+2" />, with <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> excitonic states, one loss state and one target state. 
 
 
 
@@ -61,7 +57,7 @@ Our goal is therefore to employ the Redfield method as a compromise of physical 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Approaching the problem - A naive Python implementation
 
 
-To better understand the secular Redfield approximation for propagating excitonic systems under a given Hamiltonian we implemented a naive Python version of the Redfield method for two reasons: to determine computationally demanding pieces of the algorithm and design optimizations on the general algorithm structure to bypass these bottlenecks. The density matrix was updated in a simple Euler integration scheme for this purpose. With this naive implementation we were able to confirm the scaling of the method as $N^6$ and determine the parts of the algorithm which are time consuming but suited for parallelization. 
+To better understand the secular Redfield approximation for propagating excitonic systems under a given Hamiltonian we implemented a naive Python version of the Redfield method for two reasons: to determine computationally demanding pieces of the algorithm and design optimizations on the general algorithm structure to bypass these bottlenecks. The density matrix was updated in a simple Euler integration scheme for this purpose. With this naive implementation we were able to confirm the scaling of the method as <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a> and determine the parts of the algorithm which are time consuming but suited for parallelization. 
 
 
 <center>
@@ -115,7 +111,7 @@ for (i = 0; i < SIZE; i++)
 	}
 ```
 
-We also precomputed the transition matrices $V$ and implemented matrix transpose operations implictly by using the proper indexing in matrix multiplications. Furthermore we stored as many intermediate results as possible, such as the $V^\dagger V$ term in the Lindblad operator, to avoid unnecessary computations. 
+We also precomputed the transition matrices <a href="https://www.codecogs.com/eqnedit.php?latex=V" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V" title="V" /></a> and implemented matrix transpose operations implictly by using the proper indexing in matrix multiplications. Furthermore we stored as many intermediate results as possible, such as the <a href="https://www.codecogs.com/eqnedit.php?latex=V^\dagger&space;V" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V^\dagger&space;V" title="V^\dagger V" /></a> term in the Lindblad operator, to avoid unnecessary computations. 
 
 However, due to the inaccurate Euler integration we were also forced to go to a 4th order Runge-Kutta integrator to maintain a reasonable level of accuracy in our calculations. The 4th order Runge-Kutta integrator requires the calculation of four density matrix updated per integration step, but this additional computational cost was compensated by the implemented optimizations. The figure below shows the behavior of the 4th order Runge-Kutta integrator over time. We observe, as expected, that the peak height of the initial site is preserved during the simulation. 
 
@@ -130,7 +126,7 @@ However, due to the inaccurate Euler integration we were also forced to go to a 
 <img src="files/runtimes_C.png" width="400">
 </center> 
 
-**Figure:** Runtimes for 10 Runge-Kutta integration steps of the Redfield equations implemented in C using the features discussed above. We observe a significant performance improvement over the Python implementation. However, due to the scaling of the algorithm ($N^6$) we are still not able to go to larger problem sizes. 
+**Figure:** Runtimes for 10 Runge-Kutta integration steps of the Redfield equations implemented in C using the features discussed above. We observe a significant performance improvement over the Python implementation. However, due to the scaling of the algorithm (<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a>) we are still not able to go to larger problem sizes. 
 
 
 
@@ -167,8 +163,10 @@ for (ii = 0; ii < N; ii += BLOCK_SIZE)
 ```
 
 Significant speed up could be generated by parallelizing parts of the summation in the Lindblad operator. With size nested for loops in total, three stated explicitly in the sum and another three for matrix operations in the summation term, this term exceeds the number of available levels of parallelization. With moderately large matrices in our problem (between 10 and 100 elements per row) we decided to split the Lindblad term as 
+
 <a href="https://www.codecogs.com/eqnedit.php?latex=\sum\limits_{m,M}&space;\sum\limits_{N}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\sum\limits_{m,M}&space;\sum\limits_{N}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" title="\sum\limits_{m,M} \sum\limits_{N} \gamma(\omega_{MN}) \left( V_m(\omega_{MN}) \rho(t) V^\dagger_m(\omega_{MN}) - \frac{1}{2} V_m^\dagger(\omega_{MN}) V_m(\omega_{MN}) \rho(t) - \frac{1}{2} \rho(t) V^\dagger_m(\omega_{MN}) V_m(\omega_{MN}) \right )" /></a>
-and parallelize the summation over $N$ on the gang (thread block) level and the summation term on the worker and vector level. With block size of 8 we used a total of 64 vectors and 16 workers per thread block and as many thread blocks as sites in the excitonic system. Race conditions were avoided by explicitly creating $N$ copies of the transition matrices as well as all matrices which store intermediate results of the Lindblad operator computation. 
+
+and parallelize the summation over <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> on the gang (thread block) level and the summation term on the worker and vector level. With block size of 8 we used a total of 64 vectors and 16 workers per thread block and as many thread blocks as sites in the excitonic system. Race conditions were avoided by explicitly creating <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> copies of the transition matrices as well as all matrices which store intermediate results of the Lindblad operator computation. 
 
 
 We observe a significant improvement of runtimes with this parallelization scheme over the serial implementation of the code. 
