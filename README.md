@@ -103,15 +103,15 @@ We found that both implementations of the secular Redfield method show a scaling
 To explore other parallelization models besides OpenACC, we implemented our code using OpenMP, which supports shared memory multiprocessing programming. As mentioned earlier, we focused on parallelizing the propagation of the density matrix for precomputed Hamiltonians and Lindblad operators. To determine the optimal number of threads, we implemented a simple matrix-matrix multiplication code and plotted OpenMP's performance considering various Hamiltonian sizes and number of threads:
 
 <center>
-<img src="Graphics/runtimes_openmp_mm.png" width="200"><img src="files/runtimes_loglog.png" width="200">
+<img src="Graphics/runtimes_openmp_mm.png" width="400">
 </center> 
 
 <center>
-<img src="Graphics/speedup_openmp_mm.png" width="200"><img src="files/runtimes_loglog.png" width="200">
+<img src="Graphics/speedup_openmp_mm.png" width="400">
 </center>
 
 <center>
-<img src="Graphics/scaling_openmp_mm.png" width="200"><img src="files/runtimes_loglog.png" width="200">
+<img src="Graphics/scaling_openmp_mm.png" width="400">
 </center>
 
 We can see from the performance plots that simply increasing the number of threads does not improve performance. In addition, for smaller matrix sizes (<100), which is the size we're primarily interested in, using 2 or more threads led to worse performance. However, using OpenMP with a single thread is comparable to using the serial code. Therefore, more consideration may be needed to effectively apply OpenMP for our problem.
