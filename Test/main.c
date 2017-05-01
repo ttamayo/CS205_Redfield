@@ -11,7 +11,7 @@
 /**********************************************************************/
 
 #define BLOCK_SIZE 16
-#define NSITES 62
+#define NSITES 16
 #define dt 1.0
 #define number_of_steps 10
 
@@ -23,7 +23,7 @@ int main(void) {
 	printf("# starting the propagation ...\n");
  
 	int unsigned i, j, k, l, SIZE;
-	double tic, toc, total;
+	double tic, toc;
 
 	SIZE = NSITES + 2;
 	printf("# ... propagating a %d x %d matrix\n\n", SIZE, SIZE);
@@ -115,29 +115,15 @@ int main(void) {
 	} 
 
 	// even more helpers
-//	double *V[SIZE];
-//	for (i = 0; i < SIZE; i++) {
-//		V[i] = (double *) malloc(sizeof(double) * SIZE);
-//	}
-//	double *first_real[SIZE], *second_real[SIZE], *helper[SIZE];
-//	for (i = 0; i < SIZE; i++) {
-//		first_real[i] = (double *) malloc(sizeof(double) * SIZE);
-//		second_real[i] = (double *) malloc(sizeof(double) * SIZE);
-//		helper[i] = (double *) malloc(sizeof(double) * SIZE);
-//	}
-
-	double **V[SIZE], **first[SIZE], **second[SIZE], **helper[SIZE];
+	double *V[SIZE];
 	for (i = 0; i < SIZE; i++) {
-		V[i]      = (double **) malloc(sizeof(double) * SIZE);
-		first[i]  = (double **) malloc(sizeof(double) * SIZE);
-		second[i] = (double **) malloc(sizeof(double) * SIZE);
-		helper[i] = (double **) malloc(sizeof(double) * SIZE);
-		for (j = 0; j < SIZE; j++) {
-			V[i][j]      = (double *) malloc(sizeof(double) * SIZE);
-			first[i][j]  = (double *) malloc(sizeof(double) * SIZE);
-			second[i][j] = (double *) malloc(sizeof(double) * SIZE);
-			helper[i][j] = (double *) malloc(sizeof(double) * SIZE);
-		}
+		V[i] = (double *) malloc(sizeof(double) * SIZE);
+	}
+	double *first_real[SIZE], *second_real[SIZE], *helper[SIZE];
+	for (i = 0; i < SIZE; i++) {
+		first_real[i] = (double *) malloc(sizeof(double) * SIZE);
+		second_real[i] = (double *) malloc(sizeof(double) * SIZE);
+		helper[i] = (double *) malloc(sizeof(double) * SIZE);
 	}
 
 
@@ -153,7 +139,7 @@ int main(void) {
 //	#pragma acc data copyin(hamiltonian[0:SIZE])
 
 	#pragma acc data copyin(hamiltonian[0:SIZE], gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], links_to_target[0:SIZE], links_to_loss[0:SIZE])  
-	#pragma acc data copyin(V[0:SIZE][0:SIZE][0:SIZE], first[0:SIZE][0:SIZE][0:SIZE], second[0:SIZE][0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE][0:SIZE])
+	#pragma acc data copyin(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])
 	#pragma acc data copyin(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 	#pragma acc data copyin(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
 	#pragma acc data create(reduction_intermediates[0:SIZE][0:SIZE][0:SIZE])
@@ -166,7 +152,7 @@ int main(void) {
 	
 //		#pragma acc kernels	
 //		{
-		get_density_update(rho_real, rho_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		get_density_update(rho_real, rho_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first_real, second_real, helper, reduction_intermediates, SIZE);
 
 		#pragma acc kernels     present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 		#pragma acc loop independent collapse(2)
@@ -192,7 +178,7 @@ int main(void) {
 //		printf("getting k2\n");
 //		#pragma acc update host(h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 
-		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first_real, second_real, helper, reduction_intermediates, SIZE);
                 
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 		#pragma acc loop independent collapse(2)
@@ -215,7 +201,7 @@ int main(void) {
 
 		//=== get k3 ===//
 
-		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first_real, second_real, helper, reduction_intermediates, SIZE);
 
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
                 #pragma acc loop independent collapse(2)
@@ -238,7 +224,7 @@ int main(void) {
 
 		//=== get k4 ===//
 
-		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first_real, second_real, helper, reduction_intermediates, SIZE);
 
                 #pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE], k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE])
                 #pragma acc loop independent collapse(2)
@@ -267,13 +253,10 @@ int main(void) {
 		transpose(eigVects, SIZE);
 
 
-	total = 0;
-	printf("%d ", step);
+		printf("%d ", step);
         for (i = 0; i < SIZE; i++) {
             printf("%.10f ", rho_real[i][i]);
-		total += rho_real[i][i];
         }
-	printf("%.10f ", total);
         printf("\n");
 
         rotate(rho_real, eigVects, SIZE);
