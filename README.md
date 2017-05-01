@@ -96,6 +96,31 @@ We found that both implementations of the secular Redfield method show a scaling
 <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^3.5" title="N^{3.5}" /></a> with *N* the number of excitonic sites in the system.
 
 
+## <i class="fa fa-check-square" aria-hidden="true"></i>  C implementations
+
+Due to the computational demand of a Python implementation we quickly realized that our integration scheme will benefit from switching to numerically more efficient languages such as C. 
+
+
+
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Parallelizing Redfield for GPUs: OpenACC implementation 
+
+Encouraged by the speed up we already observed by translating the code from Python to C we wanted to make use of the computational power of GPUs and speed up the code even further by parallelizing the propagation step, in particular the highly demanding computation of the Lindblad operator term in the Redfield equation. 
+
+We observed the largest speed up when parallizing matrix operations between the density matrix and the transition matrices on the warp and thread level and distributing one of the loops for computing these terms on the thread block level. With this computation scheme we were forced to allocate N copies of the transition matrices to avoid race conditions between thread blocks. 
+
+With this implementation we achieved the run times and speed ups shown below. Times were measured for 10 iterations of the 4th order Runge Kutta integration scheme. Calculations were run on a NVIDIA Tesla K80 GPU. 
+
+<center>
+<img src="Graphics/benchmark.png" width="400">
+</center> 
+
+As displayed in the benchmark plot above we achieve significantly smaller runtimes with the parallelized code, which allows us to compute the population dynamics in much larger excitonic systems. 
+
+<center>
+<img src="Graphics/speedup.png" width="400">
+</center> 
+
+
 
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Features: OpenMP implementation
