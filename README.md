@@ -1,5 +1,5 @@
-#CS205 Final project
-#Implementation and parallelization of the secular Redfield equations
+# CS205 Final project
+# Implementation and parallelization of the secular Redfield equations
 
 Florian Hase, Hannah Sim, and Teresa Tamayo
 
@@ -157,8 +157,8 @@ for (ii = 0; ii < N; ii += BLOCK_SIZE)
 	            index = ii + i;
 	            jndex = jj + j;
 	            if (index < N && jndex < N) {
-	                comm_real[index][jndex] = (hamiltonian[jndex] - hamiltonian[index]) * rho_imag[index][jndex] * HBAR_INV;
-	                comm_imag[index][jndex] = (hamiltonian[index] - hamiltonian[jndex]) * rho_real[index][jndex] * HBAR_INV;
+	                comm_real[index][jndex] = (hamiltonian[jndex] - hamiltonian[index]) * rho_imag[index][jndex];
+	                comm_imag[index][jndex] = (hamiltonian[index] - hamiltonian[jndex]) * rho_real[index][jndex];
 	            }
 	        }
         }
