@@ -206,9 +206,9 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Strong Scaling via OpenMP
 
-As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations should reduce the runtimes and improve the scalability. 
+As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations should reduce the runtimes and improve scalability. 
 
-We implemented matrix-matrix multiplication using OpenMP which supports shared memory multiprocessing programming. Various Hamiltonian sizes and number of threads were investigated to determine which sets of parameters were ideal (ie gives us the best performance) for system sizes and time scales we would eventually want to implement.
+We implemented matrix-matrix multiplication using OpenMP which supports shared memory multiprocessing programming. Various Hamiltonian sizes and number of threads were investigated to determine parameters that would give us the best performance for large system sizes and long time scales.
 
 
 <center>
