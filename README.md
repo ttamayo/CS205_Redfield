@@ -208,7 +208,7 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations would help reduce the runtimes and improve scalability. 
 
-We implemented matrix-matrix multiplication using blocking, shown to be robust for large matrix sizes, and OpenMP which supports shared memory multiprocessing programming. Below is a code listing of the blocked matrix-matrix multiplication implementation:
+We implemented matrix-matrix multiplication using blocking, shown to be robust for large matrix sizes, and OpenMP which supports shared memory multiprocessing programming. Below is the code listing for the blocked matrix-matrix multiplication implementation:
 
 ```
 #pragma omp parallel for shared(A,B,C) private(i, j, ii, jj, k) schedule(auto) collapse(2) num_threads(8)
