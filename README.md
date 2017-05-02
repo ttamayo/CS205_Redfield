@@ -68,7 +68,7 @@ To better understand the secular Redfield approximation for propagating excitoni
 
 
 <center>
-<img src="Graphics/runtimes.png" width="400"><img src="files/runtimes_loglog.png" width="400">
+<img src="Graphics/runtimes.png" width="400"><img src="Graphics/runtimes_loglog.png" width="400">
 </center>
 
 **Figure:** Runtimes of two naive Python implementations. Excitonic systems of size (n x n) were propagated for 10 integration steps with a simple Euler integration. Scalings of both, a naive Python implementation and a vectorized Python implementation, are as expected. 
