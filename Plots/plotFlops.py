@@ -25,9 +25,7 @@ content.close()
 values = np.array(values)
 
 x = values[:,0][np.where(values[:, 1] != 0)] + 2.
-
-flops = 40. * (20 * x**2 + 24 * x**3 + 44 * x**4 + 11 * x**5 + 22 * x**6)
-
+flops = 54 * x**2 + 26 * x**3 + 2 * x**4 + 10*x**6
 z_cpu = values[:,1][np.where(values[:, 1] != 0)]
 #y_cpu = values[:,3][np.where(values[:, 1] != 0)]
 z_gpu = values[:,2][np.where(values[:, 1] != 0)]
@@ -46,5 +44,5 @@ plt.xlabel('Problem size (n x n)')
 plt.ylabel('FLOPs / second')
 #plt.xscale('log')
 #plt.yscale('log')
-plt.savefig('flops.png', bbox_inches = 'tight')
+#plt.savefig('speedup.png', bbox_inches = 'tight')
 plt.show()

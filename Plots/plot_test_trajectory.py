@@ -15,7 +15,7 @@ sns.set_context('paper', font_scale = 2.0, rc = {'lines.linewidth': 3})
 #		values.append([float(element) for element in line.split()])
 #content.close()
 
-values = np.loadtxt('test')
+values = np.loadtxt('population_dynamics_16_openacc.dat')
 print values.shape
 #print values[0, 0]
 print len(values[0])
@@ -24,19 +24,19 @@ print len(values[1])
 
 for i in range(1, values.shape[1]):
 	if i == 2 or values.shape[1] - 1:
-		ls = '--'
+		ls = '-'
 	else:
 		ls = '-'
 	print i
 	plt.plot(values[:, 0], values[:, i],  ls = ls)
 plt.plot(values[:, 0], np.sum(values[:, 1:], axis = 1), label = 'Total')
 
-plt.legend(loc = 'best')
+#plt.legend(loc = 'best')
 plt.xlabel('Time [fs]')
 plt.ylabel('Population')
 
 plt.ylim(-0.05, 1.05)
-plt.savefig('RungeKutta_test.png', bbox_inches = 'tight')
+plt.savefig('population_dynamics_openacc_16.png', bbox_inches = 'tight')
 plt.show()
 
 

@@ -1,0 +1,5 @@
+First steps towards a scalable Redfield implementation in Python
+
+Contains a naive implementation and a vectorized implementation
+
+None of the two are even close to comparable with the parallelized implementation or even the C implementation
