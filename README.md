@@ -215,13 +215,21 @@ We implemented matrix-matrix multiplication using OpenMP which supports shared m
 <img src="Graphics/runtimes_openmp.png" width="400">
 </center> 
 
+**Figure:** Runtimes [seconds] of matrix-matrix multiplication using multithreading via OpenMP. Generally, adding more threads led to faster runtimes.
+
 <center>
 <img src="Graphics/speedup_openmp.png" width="400">
 </center>
 
+**Figure:** Speedups of matrix-matrix multiplication using multiple threads. We can see that the use of 10 threads is better justified for larger system sizes.
+
+
 <center>
 <img src="Graphics/scaling_openmp.png" width="400">
 </center>
+
+**Figure:** Scaling of matrix-matrix multiplication using multiple threads. Though not very close to the ideal curve, generally, adding more threads led to better scaling.
+
 
 Above are performance plots from testing out various matrix sizes with different number of threads. Generally, we note that a greater number of threads led to faster runtimes and better scaling. However, simply adding more threads does not lead to favorable performance due to overheads. Thus, one should check that the matrix size is large enough such that the use of more threads is effective. Currently, our Redfield code can work well for relatively small Hamiltonian sizes, but further optimizations including use of OpenMP for stronger scaling may eventually allow us to run the entire calculation for much larger systems for longer time scales.
 
