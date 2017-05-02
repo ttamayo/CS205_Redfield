@@ -1,9 +1,9 @@
-C scripts in this directory perform serial matrix mutliplications on complex
-valued matrices
+C scripts in this directory perform various matrix operations on complex-valued and real-valued matrices.
+
+These were implemented to test individual operation to ensure efficiency and accuracy for the main Redfield code.
 
 Two different methods were implemented: 
-- naive matrix multiplication using comlex.h in mat_mul_complex.c
-- naive matrix mutliplication with complex matrices broken up into real and 
-  imaginary part in mat_mul_complexified.c
+- naive matrix multiplication using complex.h
+- naive matrix mutliplication with complex matrices broken up into real and imaginary parts (Term "complexified" was used for this separation process.)
 
- The latter implementation is faster for large (N ~> 240) matrices (plots will follow)
+The latter implementation is faster for large (N ~> 240) matrices.
