@@ -12,14 +12,14 @@ int main(void) {
 
 
 	double A[SIZE][SIZE];
-    double B[SIZE][SIZE];
-    double C[SIZE][SIZE];
+	double B[SIZE][SIZE];
+	double C[SIZE][SIZE];
 	
 	int unsigned i, j, k;
-    int unsigned ii, jj, index, jndex;
-    double temp;
+	int unsigned ii, jj, index, jndex;
+	double temp;
 	
-    // Initialize matrices
+	// Initialize matrices
 	for (i = 0; i < SIZE; i++) {
                 for (j = 0; j < SIZE; j++) {
                         if (i == j) {
@@ -35,11 +35,11 @@ int main(void) {
         }
 
 
-    // Matrix mulitply using blocks and multithreading via OpenMP
+	// Matrix mulitply using blocks and multithreading via OpenMP
+	// Here, setting 6 threads (can choose)
 	#pragma omp parallel for shared(A,B,C) private(i, j, ii, jj, k) schedule(auto) collapse(2) num_threads(6)
         for (i = 0; i < SIZE; i += BLOCK_SIZE) {
-                for (j = 0; j < SIZE; j += BLOCK_SIZE) {
-		
+                for (j = 0; j < SIZE; j += BLOCK_SIZE) {	
 			for (ii = 0; ii < BLOCK_SIZE; ii += 1) {
                                 for (jj = 0; jj < BLOCK_SIZE; jj += 1) {
                                         index = ii + i;
@@ -57,7 +57,7 @@ int main(void) {
 	}
 
 
-    // Print product C
+	// Print product matrix C to check for smaller matrix sizes
 /*
 	for (i = 0; i < SIZE; i++) {
     		for (j = 0; j < SIZE; j++) {
@@ -68,16 +68,10 @@ int main(void) {
 */	
 	
 
-    // Check number of threads used 
+	// Check number of threads used 
 	printf ( "  Number of processors available = %d\n", omp_get_num_procs ( ) );
-    printf ( "  Number of threads              = %d\n", omp_get_max_threads ( ) );
+	printf ( "  Number of threads              = %d\n", omp_get_max_threads ( ) );
 
         return 0;
 }
-
-
-
-
-
-
 

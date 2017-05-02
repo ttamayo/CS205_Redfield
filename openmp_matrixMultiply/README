@@ -18,5 +18,13 @@ Compile serial version with:
 Compile OpenMP parallel version with:
 	icc *.c -openmp
 
+** If running an interactive job, one can set the number of threads via: export OMP_NUM_THREADS=[INSERT NUMBER OF THREADS]. Alternatively, one may include the following lines in the submission (.sh) file: 
+
+```
+# Run program
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+srun -c $SLURM_CPUS_PER_TASK ./a.out > 128_1thread.tx
+```
+
 Then run and time with: 
 	time ./a.out
