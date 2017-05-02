@@ -204,7 +204,7 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 
 
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Strong Scaling via OpenMP
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Stronger Scaling via OpenMP
 
 As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations should reduce the runtimes and improve scalability. 
 
