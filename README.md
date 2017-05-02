@@ -7,7 +7,7 @@ The critical process of energy harvesting in solar cells is to quickly convert e
 
 
 <center>
-<img src="files/FMO.png" width="400">
+<img src="Graphics/FMO.png" width="400">
 </center> 
 
 
@@ -61,14 +61,14 @@ To better understand the secular Redfield approximation for propagating excitoni
 
 
 <center>
-<img src="files/python_population_euler.png" width="400">
+<img src="Graphics/python_population_euler.png" width="400">
 </center>
 
 **Figure:** Population dynamics in Python with Euler integration (1 fs time step) for four excitonic sites (1 to 4), a loss state (0) and a target state (5). The sum of the population over all states is plotted as a reference (total) and remains constant during the simulation, in agreement with properties of the underlying differential equation. The excited state is quickly distributed among the four sites and then slowly decays into loss and target states. The long term behavior matches the physical expectation of thermalized excited states.
 
 
 <center>
-<img src="files/runtimes.png" width="400"><img src="files/runtimes_loglog.png" width="400">
+<img src="Graphics/runtimes.png" width="400"><img src="files/runtimes_loglog.png" width="400">
 </center>
 
 **Figure:** Runtimes of two naive Python implementations. Excitonic systems of size (n x n) were propagated for 10 integration steps with a simple Euler integration. Scalings of both, a naive Python implementation and a vectorized Python implementation, are as expected. 
@@ -88,7 +88,7 @@ In addition, we encountered one major problem with the Euler integration scheme.
 
 
 <center>
-<img src="files/python_population_euler_going_wrong.png" width="400">
+<img src="Graphics/python_population_euler_going_wrong.png" width="400">
 </center>
 
 **Figure:** Population dynamics in Python with Euler integration (1 fs time step) for four excitonic sites (1 to 4), a loss state (0) and a target state (5) as before, except for zero couplings to the environment. Clearly the Euler integrator cannot maintain physically reasonable population numbers between 0 and 1, which indicates that more sophisticated integration schemes need to be employed for accurate time evolution.
@@ -117,13 +117,13 @@ However, due to the inaccurate Euler integration we were also forced to go to a 
 
 
 <center>
-<img src="files/RungeKutta_test.png" width="400">
+<img src="Graphics/RungeKutta_test.png" width="400">
 </center> 
 
 **Figure:** Population dynamics in C with 4th order Runge-Kutta integration (1 fs time step) without coupling to the environment. We observe oscillations between the excitonic states as expected and see that the peak in the population of the initial site returns to 1 throughout the course of the simulation as opposed to the Euler integration. 
 
 <center>
-<img src="files/runtimes_C.png" width="400">
+<img src="Graphics/runtimes_C.png" width="400">
 </center> 
 
 **Figure:** Runtimes for 10 Runge-Kutta integration steps of the Redfield equations implemented in C using the features discussed above. We observe a significant performance improvement over the Python implementation. However, due to the scaling of the algorithm (<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a>) we are still not able to go to larger problem sizes. 
@@ -172,7 +172,7 @@ and parallelize the summation over <a href="https://www.codecogs.com/eqnedit.php
 We observe a significant improvement of runtimes with this parallelization scheme over the serial implementation of the code. 
 
 <center>
-<img src="files/benchmark.png" width="400">
+<img src="Graphics/benchmark.png" width="400">
 </center> 
 
 **Figure:** Runtimes of 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. Displayed are runtimes for the serial C implementation and the SIMT model with OpenACC directives on the C code. Simulations were run on a NVIDIA Tesla K80 GPU. Due to the computational demand of serial simulations fewer points are shown, indicating that the parallization allows us to go to larger problem sizes in reasonable time. 
@@ -181,13 +181,13 @@ We observe a significant improvement of runtimes with this parallelization schem
 As displayed in the benchmark plot above we achieve significantly smaller runtimes with the parallelized code, which allows us to compute the population dynamics in much larger excitonic systems. 
 
 <center>
-<img src="files/speedup.png" width="400">
+<img src="Graphics/speedup.png" width="400">
 </center> 
 
 **Figure:** Speedups for 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. We compared runtimes of the serial C implementation to the OpenACC parallelized implementation. Speedups could only be computed for problem sizes for which serial runtimes were available. Due to the FLOPs per second graph recorded for the GPU and the rather constant FLOPs per second for the CPU it is expected that we can achieve speedups up to roughly a factor of 100 for larger problem sizes (resulting in about 5 days of runtime for 10 iterations of 80 x 80 matrices on a single CPU).
 
 <center>
-<img src="files/flops.png" width="400">
+<img src="Graphics/flops.png" width="400">
 </center> 
 
 **Figure:** Lower bound on the throughput of the GPU. A single NVIDIA Tesla K80 is expected to achieve a maximum 0.9 TFLOPS throughput. The lower bound on the throughput was calculated by counting the number of additions and multiplications to be performed during the computation. 
@@ -195,7 +195,7 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 
 <center>
-<img src="files/population_dynamics_openacc_16.png" width="400">
+<img src="Graphics/population_dynamics_openacc_16.png" width="400">
 </center> 
 
 
