@@ -1,1 +1,3 @@
 Procedure for running OpenMP Redfield code.
+
+Also describe what each directory contains ... 
