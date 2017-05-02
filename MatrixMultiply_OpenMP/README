@@ -1,19 +1,27 @@
 Matrix-matrix multiplication using blocking and multithreading via OpenMP
-
+-------------------------------------------------------------------------
 
 Contains the following subdirectories:
 - serial	... serial matrix-matrix multiplication (naive 3-loop)
 - openmp        ... parallel matrix-matrix multiplication (blocking and multithreading)
 
+
 Each subdirectory contains:
 - a.out 	... executable
 - main.c	... main routine
 
+
+SERIAL IMPLEMENTATION
+---------------------
+
 Compile serial version with:
 	icc *.c
-
 (after loading module: module load intel/15.0.0-fasrc01 )
 
+
+
+PARALLEL IMPLEMENTATION
+-----------------------
 
 Compile OpenMP parallel version with:
 	icc *.c -openmp
@@ -26,5 +34,5 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 srun -c $SLURM_CPUS_PER_TASK ./a.out > 128_1thread.tx
 ```
 
-Then run and time with: 
+Then run and time code with: 
 	time ./a.out
