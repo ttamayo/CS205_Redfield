@@ -32,7 +32,7 @@ void hamiltonian_commutator(double **rho_real, double **rho_imag, double *hamilt
 
 	#pragma acc kernels present(hamiltonian[0:N])    present(comm_real[0:N][0:N], comm_imag[0:N][0:N])     present(rho_real[0:N][0:N], rho_imag[0:N][0:N])
 	#pragma acc loop independent collapse(2)
-    for (ii = 0; ii < N; ii += BLOCK_SIZE)
+        for (ii = 0; ii < N; ii += BLOCK_SIZE)
 		for(jj = 0; jj < N; jj += BLOCK_SIZE) {
 			#pragma acc loop independent collapse(2)
 			for (i = 0; i < BLOCK_SIZE; i++) {
@@ -650,7 +650,7 @@ void get_density_update(double **rho_real, double **rho_imag, double *energies, 
 
 //	#pragma acc update host(lindblad_real[0:N][0:N])
 //	print_matrix_real(rho_real, N);
-//	lindblad_operator(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, N);
+	lindblad_operator(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, N);
 //	exit(1);
 //	#pragma acc update device(lindblad_real[0:N][0:N])
 //	print_matrix_real(lindblad_real, N);

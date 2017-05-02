@@ -1,61 +1,94 @@
+/*
+ * Main program for propagating an excitonic system based on 
+ * the secular Redfield approximation
+ * 
+ * Exciton Hamiltonians of size NSITES x NSITES are randomly drawn
+ * 
+ * Trap and sink states are explicitly modeled as 
+ * two additional states in the exciton Hamiltonian
+ *
+ * The system is propagated in a 4th order Runge Kutta scheme
+ *
+ * Exciton populations are recorded at every iteration step
+ *
+ * author: Florian Hase
+ *
+ */
 
-
-// external modules
+// loading all modules
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-// internal modules
 #include "headers.h"
 
-/**********************************************************************/
+//********************************************************************//
+// defining global variables 
 
-#define BLOCK_SIZE 16
-#define NSITES 4
-#define dt 1.0
-#define number_of_steps 2000
+#define NSITES 62			 // number of excitonic sites to be modeled
+#define dt 1.0				 // integration time step in fs
+#define number_of_steps 10   // number of integration time steps
+#define BLOCK_SIZE 16        // size for blocked matrix operations
 
-/**********************************************************************/
-
-
+//********************************************************************//
+// main routine
 
 int main(void) {
 	printf("# starting the propagation ...\n");
- 
+
+	// we start with initializing a number of helper integers and floats
 	int unsigned i, j, k, l, SIZE;
 	double tic, toc, total;
 
+	// compute the number of states in the Hamiltonian
+	// ... remember: sinks and traps are modeled explicitly -> 2 more states
 	SIZE = NSITES + 2;
-	printf("# ... propagating a %d x %d matrix\n\n", SIZE, SIZE);
+	printf("# ... propagating a %d x %d hamiltonian\n\n", SIZE, SIZE);
 
-	/* allocate matrices */
-	// one dimensional
-	double *hamiltonian, *links_to_loss, *links_to_target;
+	//------------------------------------------------------------------//
+
+	// allocate space for ...
+	// ... hamiltonian, eigenvectors, eigenvalues
+	// ... rates to sinks and target
+	// ... real and imaginary part of the density matrix
+
+	double *hamiltonian, *links_to_loss, *links_to_target;			// one dimensional arrays
 	hamiltonian     = (double *) malloc(sizeof(double) * SIZE);
 	links_to_loss   = (double *) malloc(sizeof(double) * SIZE);
 	links_to_target = (double *) malloc(sizeof(double) * SIZE);
-	// two dimensional, squared
-	double *eigVects[SIZE], *rho_real[SIZE], *rho_imag[SIZE];
+
+	double *eigVects[SIZE], *rho_real[SIZE], *rho_imag[SIZE];		// two dimensional arrays
 	for (i = 0; i < SIZE; i++){
 		eigVects[i] = (double *) malloc(sizeof(double) * SIZE);
 		rho_real[i] = (double *) malloc(sizeof(double) * SIZE);
 		rho_imag[i] = (double *) malloc(sizeof(double) * SIZE);
 	}
-	// two dimensional, rectangular
-	double *params[SIZE - 2];
+
+	//------------------------------------------------------------------//
+
+	// allocate space for ...
+	// ... spectral density parameters (describe coupling to environment)
+	// ... transition rates between excitonic states
+
+	double *params[SIZE - 2];										// two dimensional array
 	for (i = 0; i < SIZE - 2; i++) {
 		params[i] = (double *) malloc(sizeof(double) * 3);
 	}
-	// three dimensional
-	double **gammas[SIZE];
+
+	double **gammas[SIZE];											// three dimensional array
 	for (i = 0; i < SIZE; i++) {
 		gammas[i] = (double **) malloc(sizeof(double) * SIZE);
 		for (j = 0; j < SIZE; j++) {
 			gammas[i][j] = (double *) malloc(sizeof(double) * SIZE);
 		}
 	}	
-	// four dimensional, rectangular
-	double ***all_Vs[SIZE];
+
+	//------------------------------------------------------------------//
+
+	// allocate space for ...
+	// ... storing transition matrices V
+	// ... storing intermediate results
+
+	double ***all_Vs[SIZE];											// four dimensional array
 	for (i = 0; i < SIZE; i++) {
 		all_Vs[i] = (double ***) malloc(sizeof(double) * SIZE);
 		for (j = 0; j < SIZE; j++) {
@@ -65,8 +98,8 @@ int main(void) {
 			}
 		}
 	}
-	// three dimensional, squared
-	double **reduction_intermediates[SIZE];
+
+	double **reduction_intermediates[SIZE];							// three dimensional array
 	for (i = 0; i < SIZE; i++) {
 		reduction_intermediates[i] = (double **) malloc(sizeof(double) * SIZE);
 		for (j = 0; j < SIZE; j++) {
@@ -74,24 +107,15 @@ int main(void) {
 		}
 	}
 
-	/* initialize matrices */
-	gen_random_hamiltonian_real(eigVects, SIZE);
-	gen_test_spec_densities(params, NSITES);
-	gen_test_links(links_to_loss, links_to_target, SIZE);
-	gen_zero_matrix(rho_real, SIZE);
-	gen_zero_matrix(rho_imag, SIZE);
-	rho_real[1][1] = 1.;
+	//------------------------------------------------------------------//
 
-	/* preprocess matrices */
-	diagonalize(eigVects, hamiltonian, SIZE);
-	get_rates(gammas, params, hamiltonian, SIZE);		// produces a bunch of nans
-	get_V_matrices(all_Vs, eigVects, SIZE);
+	// allocate space for ...
+	// ... more intermediate results 
+	// ... for computing the density matrix update
+	// ... the density matrix update
+	// ... the Runge Kutta steps
 
-	rotate(rho_real, eigVects, SIZE);
-	rotate(rho_imag, eigVects, SIZE);
-
-	/* allocate more matrices */
-	// two dimensional, squared
+	// two dimensional arrays
 	double *comm_real[SIZE], *comm_imag[SIZE], *lindblad_real[SIZE], *lindblad_imag[SIZE];
 	for (i = 0; i < SIZE; i++){
 		comm_real[i] = (double *) malloc(sizeof(double) * SIZE);
@@ -99,6 +123,7 @@ int main(void) {
 		lindblad_real[i] = (double *) malloc(sizeof(double) * SIZE);
 		lindblad_imag[i] = (double *) malloc(sizeof(double) * SIZE);
 	}
+	// two dimensional arrays
 	double *k1_real[SIZE], *k2_real[SIZE], *k3_real[SIZE], *k4_real[SIZE], *h1_real[SIZE];
 	double *k1_imag[SIZE], *k2_imag[SIZE], *k3_imag[SIZE], *k4_imag[SIZE], *h1_imag[SIZE];
 	for (i = 0; i < SIZE; i++) {
@@ -114,18 +139,7 @@ int main(void) {
 		h1_imag[i] = (double *) malloc(sizeof(double) * SIZE);
 	} 
 
-	// even more helpers
-//	double *V[SIZE];
-//	for (i = 0; i < SIZE; i++) {
-//		V[i] = (double *) malloc(sizeof(double) * SIZE);
-//	}
-//	double *first_real[SIZE], *second_real[SIZE], *helper[SIZE];
-//	for (i = 0; i < SIZE; i++) {
-//		first_real[i] = (double *) malloc(sizeof(double) * SIZE);
-//		second_real[i] = (double *) malloc(sizeof(double) * SIZE);
-//		helper[i] = (double *) malloc(sizeof(double) * SIZE);
-//	}
-
+	// three dimensional arrays
 	double **V[SIZE], **first[SIZE], **second[SIZE], **helper[SIZE];
 	for (i = 0; i < SIZE; i++) {
 		V[i]      = (double **) malloc(sizeof(double) * SIZE);
@@ -140,6 +154,32 @@ int main(void) {
 		}
 	}
 
+	//------------------------------------------------------------------//
+
+	// now we can set up our system
+
+	// first, generate the hamiltonian
+	gen_random_hamiltonian_real(eigVects, SIZE);
+	// generate spectral density parameters
+	gen_test_spec_densities(params, NSITES);
+	// generate rates to sinks and traps
+	gen_test_links(links_to_loss, links_to_target, SIZE);
+	// generate the initial density matrix - we start the propagation at site 1
+	gen_zero_matrix(rho_real, SIZE);
+	gen_zero_matrix(rho_imag, SIZE);
+	rho_real[1][1] = 1.;
+
+	// diagonalize the hamiltonian
+	diagonalize(eigVects, hamiltonian, SIZE);
+	// get transition rates between exciton states
+	get_rates(gammas, params, hamiltonian, SIZE);
+	// get transition matrices 
+	get_V_matrices(all_Vs, eigVects, SIZE);
+
+	// rotate the density matrix into the exciton eigenbasis
+	rotate(rho_real, eigVects, SIZE);
+	rotate(rho_imag, eigVects, SIZE);
+
 
 	// start propagation //
 	int unsigned ii, jj;
@@ -147,28 +187,26 @@ int main(void) {
 	int unsigned step;
 	tic = clock();
 
-	printf("# started propagation\n");
+	printf("started propagation\n");
 
-//	#pragma acc data copyin(hamiltonian[0:SIZE], eigVects[0:SIZE][0:SIZE], links_to_target[0:SIZE], links_to_loss[0:SIZE], gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3])   copyin(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])   copyin(h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE], k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE])    copyin(V[0:SIZE][0:SIZE], first_real[0:SIZE][0:SIZE], second_real[0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE])     copy(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])    create(reduction_intermediates[0:SIZE][0:SIZE][0:SIZE][0:SIZE][0:SIZE])
-//	#pragma acc data copyin(hamiltonian[0:SIZE])
-
+	// copy all data to the GPU
+	// ... note: once all the data is on the GPU, only the density matrix needs to be communicated between GPU and CPU
 	#pragma acc data copyin(hamiltonian[0:SIZE], gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], links_to_target[0:SIZE], links_to_loss[0:SIZE])  
 	#pragma acc data copyin(V[0:SIZE][0:SIZE][0:SIZE], first[0:SIZE][0:SIZE][0:SIZE], second[0:SIZE][0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE][0:SIZE])
 	#pragma acc data copyin(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 	#pragma acc data copyin(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
 	#pragma acc data create(reduction_intermediates[0:SIZE][0:SIZE][0:SIZE])
 	#pragma acc data copyin(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])
+	// propagate for the number of specified integration steps
 	for (step = 0; step < number_of_steps; step++) {
+		// a 4th order Runge Kutta scheme is used for propagation
+		// as a compromise of computational demand and numerical accuracy
 
-		// propagate in a 4th order runge kutta scheme
-
-		//=== get k1 ===//
-	
-//		#pragma acc kernels	
-//		{
+		//=== getting Runge Kutta k1 ===//
+		// ... compute density matrix update
 		get_density_update(rho_real, rho_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
-
-		#pragma acc kernels     present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
+		// ... compute k1 in blocked matrix operations
+		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 		#pragma acc loop independent collapse(2)
 		for (ii = 0; ii < SIZE; ii += BLOCK_SIZE) 
 			for (jj = 0; jj < SIZE; jj += BLOCK_SIZE) {
