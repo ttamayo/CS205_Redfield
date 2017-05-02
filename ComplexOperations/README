@@ -1,13 +1,13 @@
 
 This subdirectory contains C scripts in this directory perform various matrix operations including:
 
-- Runge Kutta 4th order integration
-- conjugate tranpose (dagger)
-- matrix addition and subtraction
-- matrix multiplication
-- matrix diagonalization
+- Runge Kutta 4th order integration ... "RungeKutta_complex"
+- conjugate tranpose (dagger) ... "conjugateTranspose"
+- matrix addition and subtraction ... "matrixAddition", "matrixSubtraction"
+- matrix multiplication ... "matrixMultiplication"
+- matrix diagonalization ... "matrixDiagonalization"
 
-... on "complex" and "complexified"  matrices.
+on "complex" and "complexified"  matrices.
 
 These matrix operations were implemented to test individual operations to ensure efficiency and accuracy for the main Redfield code (ie parts of these scripts were copied into the main code).
 
