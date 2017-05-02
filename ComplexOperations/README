@@ -1,9 +1,9 @@
-C scripts in this directory perform various matrix operations on complex-valued and real-valued matrices.
+C scripts in this directory perform various matrix operations (multiplication, diagonalization, addition, subtraction, transpose) on complex-valued and real-valued matrices.
 
-These were implemented to test individual operation to ensure efficiency and accuracy for the main Redfield code.
+These were implemented to test individual operations to ensure efficiency and accuracy for the main Redfield code.
 
 Two different methods were implemented: 
 - naive matrix multiplication using complex.h
-- naive matrix mutliplication with complex matrices broken up into real and imaginary parts (Term "complexified" was used for this separation process.)
+- naive matrix mutliplication with complex matrices broken up into real and imaginary parts (The term "complexified" was used to describe this separation process.)
 
 The latter implementation is faster for large (N ~> 240) matrices.
