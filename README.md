@@ -204,9 +204,12 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 
 
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Features: OpenMP implementation
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Strong Scaling via OpenMP
 
-To explore other parallelization models besides OpenACC, we implemented our code using OpenMP, which supports shared memory multiprocessing programming. As mentioned earlier, we focused on parallelizing the propagation of the density matrix for precomputed Hamiltonians and Lindblad operators. To determine the optimal number of threads, we implemented a simple matrix-matrix multiplication code and plotted OpenMP's performance considering various Hamiltonian sizes and number of threads:
+As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations should reduce the runtimes and improve the scalability. 
+
+We implemented matrix-matrix multiplication using OpenMP which supports shared memory multiprocessing programming. Various Hamiltonian sizes and number of threads were investigated to determine which sets of parameters were ideal (ie gives us the best performance) for system sizes and time scales we would eventually want to implement.
+
 
 <center>
 <img src="Graphics/runtimes_openmp_mm.png" width="400">
