@@ -32,7 +32,7 @@ void hamiltonian_commutator(double **rho_real, double **rho_imag, double *hamilt
 
 	#pragma acc kernels present(hamiltonian[0:N])    present(comm_real[0:N][0:N], comm_imag[0:N][0:N])     present(rho_real[0:N][0:N], rho_imag[0:N][0:N])
 	#pragma acc loop independent collapse(2)
-        for (ii = 0; ii < N; ii += BLOCK_SIZE)
+    for (ii = 0; ii < N; ii += BLOCK_SIZE)
 		for(jj = 0; jj < N; jj += BLOCK_SIZE) {
 			#pragma acc loop independent collapse(2)
 			for (i = 0; i < BLOCK_SIZE; i++) {

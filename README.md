@@ -172,14 +172,34 @@ and parallelize the summation over <a href="https://www.codecogs.com/eqnedit.php
 We observe a significant improvement of runtimes with this parallelization scheme over the serial implementation of the code. 
 
 <center>
-<img src="Graphics/benchmark.png" width="400">
+<img src="files/benchmark.png" width="400">
 </center> 
+
+**Figure:** Runtimes of 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. Displayed are runtimes for the serial C implementation and the SIMT model with OpenACC directives on the C code. Simulations were run on a NVIDIA Tesla K80 GPU. Due to the computational demand of serial simulations fewer points are shown, indicating that the parallization allows us to go to larger problem sizes in reasonable time. 
+
 
 As displayed in the benchmark plot above we achieve significantly smaller runtimes with the parallelized code, which allows us to compute the population dynamics in much larger excitonic systems. 
 
 <center>
-<img src="Graphics/speedup.png" width="400">
+<img src="files/speedup.png" width="400">
 </center> 
+
+**Figure:** Speedups for 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. We compared runtimes of the serial C implementation to the OpenACC parallelized implementation. Speedups could only be computed for problem sizes for which serial runtimes were available. Due to the FLOPs per second graph recorded for the GPU and the rather constant FLOPs per second for the CPU it is expected that we can achieve speedups up to roughly a factor of 100 for larger problem sizes (resulting in about 5 days of runtime for 10 iterations of 80 x 80 matrices on a single CPU).
+
+<center>
+<img src="files/flops.png" width="400">
+</center> 
+
+**Figure:** Lower bound on the throughput of the GPU. A single NVIDIA Tesla K80 is expected to achieve a maximum 0.9 TFLOPS throughput. The lower bound on the throughput was calculated by counting the number of additions and multiplications to be performed during the computation. 
+
+
+
+<center>
+<img src="files/population_dynamics_openacc_16.png" width="400">
+</center> 
+
+
+**Figure:** Population dynamics computed with the OpenACC parallelized C code for 16 excitonic sites (matrices of size 18 x 18) for 1000 integration steps in a 4th order Runge Kutta integration. The simulation was run for 164 s on a Tesla K80 GPU.
 
 
 
