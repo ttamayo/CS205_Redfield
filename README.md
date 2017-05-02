@@ -206,9 +206,32 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Stronger Scaling via OpenMP
 
-As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations should reduce the runtimes and improve scalability. 
+As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations would help reduce the runtimes and improve scalability. 
 
-We implemented matrix-matrix multiplication using OpenMP which supports shared memory multiprocessing programming. Various Hamiltonian sizes and number of threads were investigated to determine parameters that would give us the best performance for large system sizes and long time scales.
+We implemented matrix-matrix multiplication using blocking, shown to be robust for large matrix sizes, and OpenMP which supports shared memory multiprocessing programming. Below is a code listing of the blocked matrix-matrix multiplication implementation:
+
+```
+#pragma omp parallel for shared(A,B,C) private(i, j, ii, jj, k) schedule(auto) collapse(2) num_threads(8)
+for (i = 0; i < SIZE; i += BLOCK_SIZE) {
+	for (j = 0; j < SIZE; j += BLOCK_SIZE) {
+		for (ii = 0; ii < BLOCK_SIZE; ii += 1) {
+                	for (jj = 0; jj < BLOCK_SIZE; jj += 1) {
+                        	index = ii + i;
+                                jndex = jj + j;
+                                if (index < SIZE && jndex < SIZE) {
+                                	temp = 0.;
+                                        for (k = 0; k < SIZE; k++) {
+                                        	temp += A[index][k] * B[k][jndex];
+                                        }
+                                        C[index][jndex] = temp;
+                                }
+              		}
+        	}	
+	}
+}
+```
+
+Using OpenMP, we "collapsed" or unrolled the two outer loops and tested different numbers of threads to work on portions of the overall operation. In addition, various Hamiltonian sizes were considered to determine the conditions that would give us the best performance for large system sizes and long time scales.
 
 
 <center>
