@@ -360,6 +360,7 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 				}
 			}
 
+
 	//--> start computing    V rho V^dagg    (first term of Lindblad operator)
 		// compute   V rho
 		// blocked matrix operation parallelized on the worker and vector level
