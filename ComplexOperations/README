@@ -1,9 +1,20 @@
-C scripts in this directory perform various matrix operations (multiplication, diagonalization, addition, subtraction, transpose) on complex-valued and real-valued matrices.
 
-These were implemented to test individual operations to ensure efficiency and accuracy for the main Redfield code.
+This subdirectory contains C scripts in this directory perform various matrix operations including:
 
-Two different methods were implemented: 
-- naive matrix multiplication using complex.h
-- naive matrix mutliplication with complex matrices broken up into real and imaginary parts (The term "complexified" was used to describe this separation process.)
+- Runge Kutta 4th order integration
+- conjugate tranpose (dagger)
+- matrix addition and subtraction
+- matrix multiplication
+- matrix diagonalization
+
+... on "complex" and "complexified"  matrices.
+
+These matrix operations were implemented to test individual operations to ensure efficiency and accuracy for the main Redfield code (ie parts of these scripts were copied into the main code).
+
+
+-----------------------------------------------------
+ASIDE: "Complex" vs. "Complexified" Matrix Operations
+-----------------------------------------------------
+What we mean by "complex" is that we used the standard complex type for elements of matrices. On the other hand, for the "complexified" implementations, we used two real-valued matrices to store the real and imaginary components of the complex matrix respectively. This was part of our "preprocessing" scheme where we noted that by using "complexified" implementations, we were able to achieve lower runtimes in our Redfield code.
 
 The latter implementation is faster for large (N ~> 240) matrices.
