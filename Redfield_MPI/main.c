@@ -410,6 +410,7 @@ double ****alloc_4d_double(int rows, int cols, int dept,int side) {
 
 
 int main(int argc, char *argv[]) {
+	double tic, toc, total;
         // MPI stuff
         int myrank;
         int hostid;
@@ -452,7 +453,6 @@ int main(int argc, char *argv[]) {
 
 	// we start with initializing a number of helper integers and floats
 	int unsigned i, j, k, l, SIZE;
-	double tic, toc, total;
 
 	// compute the number of states in the Hamiltonian
 	// ... remember: sinks and traps are modeled explicitly -> 2 more states
@@ -588,6 +588,16 @@ int main(int argc, char *argv[]) {
 	// rotate the density matrix into the exciton eigenbasis
 	rotate(rho_real, eigVects, SIZE);
 	rotate(rho_imag, eigVects, SIZE);
+	for (i = 0; i < SIZE; i++) {
+		for (j = 0; j < SIZE; j++) {
+			lindblad_real[i][j] = 0.;
+			lindblad_imag[i][j] = 0.;
+			for (k = 0; k < SIZE; k++) {
+				reduction_intermediates[i][j][k] = 0.0;
+
+			}
+		}
+	}
 
 
 	// start propagation //
@@ -605,60 +615,20 @@ int main(int argc, char *argv[]) {
 
 	// copy all data to the GPU
 	// ... note: once all the data is on the GPU, only the density matrix needs to be communicated between GPU and CPU
-	#pragma acc enter data copyin(hamiltonian[0:SIZE], gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:SIZE], links_to_target[0:SIZE], links_to_loss[0:SIZE])  
+	#pragma acc enter data copyin(hamiltonian[0:SIZE], gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], links_to_target[0:SIZE], links_to_loss[0:SIZE])  
 	#pragma acc enter data copyin(V[0:SIZE][0:SIZE][0:SIZE], first[0:SIZE][0:SIZE][0:SIZE], second[0:SIZE][0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE][0:SIZE])
 	#pragma acc enter data copyin(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
-	#pragma acc enter data copyin(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE])
-	#pragma acc enter data create(reduction_intermediates[0:SIZE][0:SIZE][0:SIZE])
+	#pragma acc enter data copyin(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
+	#pragma acc enter data copyin(reduction_intermediates[0:SIZE][0:SIZE][0:SIZE])
 	#pragma acc enter data copyin(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])
-	// propagate for the number of specified integration steps
 	for (step = 0; step < number_of_steps; step++) {
-		// a 4th order Runge Kutta scheme is used for propagation
-		// as a compromise of computational demand and numerical accuracy
-
-		//=== getting Runge Kutta k1 ===//
-		// ... compute density matrix update
 
 
-		// Hamiltonian
-		#pragma acc kernels present(hamiltonian[0:SIZE],comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE],rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])
-		#pragma acc loop independent collapse(2)
-        	for (ii = 0; ii < SIZE; ii += BLOCK_SIZE){
-			for(jj = 0; jj < SIZE; jj += BLOCK_SIZE) {
-				#pragma acc loop independent collapse(2)
-				for (i = 0; i < BLOCK_SIZE; i++) {
-					for (j = 0; j < BLOCK_SIZE; j++) {
-						index = ii + i;
-						jndex = jj + j;
-						if (index < SIZE && jndex < SIZE) {
-							comm_real[index][jndex] = (hamiltonian[jndex] - hamiltonian[index]) * rho_imag[index][jndex] * HBAR_INV;
-							comm_imag[index][jndex] = (hamiltonian[index] - hamiltonian[jndex]) * rho_real[index][jndex] * HBAR_INV;
-						}
-					}
-				}
-			}  
-		}
-		//#pragma acc kernels present_or_copyin(lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
-		/*for (i = 0; i < SIZE; i++) {
-			for (j = 0; j < SIZE; j++) {
-				lindblad_real[i][j] = 0.;
-				lindblad_imag[i][j] = 0.;
-			}
-		}*/
-
-//        	print_matrix_real(lindblad_imag,SIZE);
-		//#pragma acc update host(lindblad_real[0:SIZE][0:SIZE])//,lindblad_imag[0:SIZE][0:SIZE])
-		//#pragma acc update host(lindblad_real)//,lindblad_imag[0:SIZE][0:SIZE])
-
-
-		get_density_update(rho_real, rho_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, &lindblad_real, &lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		get_density_update(rho_real, rho_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, &lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		#pragma acc update host(lindblad_real[0:SIZE][0:SIZE])
 		MPI_Allreduce(MPI_IN_PLACE, &(lindblad_real[0][0]),SIZE*SIZE, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		//#pragma acc copyout(lindblad_real[0:SIZE][0:SIZE],lindblad_imag[0:SIZE][0:SIZE])
-		//#pragma acc copyout(lindblad_real[0:N][0:N],lindblad_imag[0:N][0:N])
-        	//print_matrix_real(lindblad_real,SIZE);
-     		MPI_Finalize();
-     		return 0;
-
+		#pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
+        	
 		// ... compute k1 in blocked matrix operations
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE]) copyin(lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE]) present(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 		#pragma acc loop independent collapse(2)
@@ -679,31 +649,15 @@ int main(int argc, char *argv[]) {
 				}
 			}		
 
-               
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-     		MPI_Finalize();
-     		return 0;
-
-/*
 		//=== get k2 ===//
+
 		
 //		printf("getting k2\n");
-//		#pragma acc update host(h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 
 		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		#pragma acc update host(lindblad_real[0:SIZE][0:SIZE])
+		MPI_Allreduce(MPI_IN_PLACE, &(lindblad_real[0][0]),SIZE*SIZE, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		#pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
                 
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 		#pragma acc loop independent collapse(2)
@@ -767,7 +721,6 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
-//		} // end kernels
 
 		#pragma acc update host(rho_real[0:SIZE][0:SIZE])
 
@@ -778,36 +731,16 @@ int main(int argc, char *argv[]) {
 		transpose(eigVects, SIZE);
 
 
+	}
 	total = 0;
 	printf("%d ", step);
         for (i = 0; i < SIZE; i++) {
             printf("%.10f ", rho_real[i][i]);
 		total += rho_real[i][i];
         }
-	printf("%.10f ", total);
-        printf("\n");
 
-        rotate(rho_real, eigVects, SIZE);
-        rotate(rho_imag, eigVects, SIZE);
-
-*/
-	}
-
-// 		free((void*) comm_real);
-//        free((void*) comm_imag);
-//        free((void*) lindblad_real);
-//        free((void*) lindblad_imag);
-
-        toc = clock();
 
     // Analyze time elapsed
-    double time_spent = (double)(toc - tic) / CLOCKS_PER_SEC;
-    printf("\n# RESULTS:\n");
-    printf("# --------\n");
-    printf("# Time Elapsed: %f seconds\n\n", time_spent);
-// acc data present(h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE], k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], rho_real[0:SIZE], rho_imag[0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
-
-
-
-	return 0;
+    //double time_spent = (double)(toc - tic) / CLOCKS_PER_SEC;
+    //printf("# Time Elapsed: %f seconds\n\n", time_spent);
 }
