@@ -1,0 +1,22 @@
+
+Lindblad Iteration using OpenMP
+-------------------------------
+
+After investigating a single matrix-matrix multiplication using OpenMP, we tried to implement a single computation of the "Lindblad term" (referenced/defined in the main markdown). This portion of the Redfield equation is implemented in liouville_redfield.c in both subdirectories (for serial and OpenMP implementations). 
+
+
+Instructions
+------------
+
+Compiler used: icc
+On Odyssey load module: intel/15.0.0-fasrc01
+
+
+For serial:
+	icc *.c -lblas -llapack -lm -lrt
+
+For OpenMP:
+	icc *.c -lblas -llapack -lm -lrt -openmp
+
+Then, run and time code via:
+	time ./a.out
