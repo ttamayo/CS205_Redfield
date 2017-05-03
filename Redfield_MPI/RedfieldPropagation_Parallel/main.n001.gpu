@@ -1,0 +1,186 @@
+#include "cuda_runtime.h"
+#include "pgi_cuda_runtime.h"
+#include "main.n001.h"
+extern "C" __global__ __launch_bounds__(64) void
+main_141_gpu(
+    unsigned int tc12,
+    unsigned int tc13,
+    signed char* __restrict__ p5/* .Y1336 */,
+    signed char* __restrict__ p7/* .Y1331 */,
+    signed char* __restrict__ p9/* .Y1351 */,
+    signed char* __restrict__ p11/* .Y1340 */,
+    signed char* __restrict__ p13/* .Y1332 */,
+    signed char* __restrict__ p15/* .Y1371 */,
+    signed char* __restrict__ p17/* .Y1277 */,
+    signed char* __restrict__ p19/* .Y1364 */,
+    signed char* __restrict__ p21/* .Y1281 */,
+    signed char* __restrict__ p23/* .Y1384 */)
+{
+int _i_1, _i_2;
+long long _k8_1, _k8_2;
+signed char* _p_1, *_p_2;
+unsigned int i40s;
+unsigned int i41i;
+unsigned int i42i;
+unsigned int i43i;
+i40s = 0;
+if( ((unsigned int)(0)>=(unsigned int)((tc12)*(tc13))))  goto _BB_7;
+_BB_9: ;
+_i_1 = ((((int)blockIdx.x)*(64))+((int)threadIdx.x))+((int)(i40s));
+i42i = _i_1;
+_i_2 = (_i_1)/(tc12);
+i41i = (_i_1)-((_i_2)*(tc12));
+i43i = _i_2;
+if( ((unsigned int)(i40s)>=(unsigned int)((tc12)*(tc13))))  goto _BB_10;
+if( ((unsigned int)(i42i)>=(unsigned int)((tc12)*(tc13))))  goto _BB_10;
+_k8_1 = ((long long)(i43i))*(8LL);
+_k8_2 = ((long long)(i41i))*(8LL);
+_p_1 = (signed char*)((p9/* .Y1351 */)+(_k8_1));
+*( double*)((( signed char**)p9/* .Y1351 */)[(long long)(i43i)]+(_k8_2)) = ((*( double*)((( signed char**)p5/* .Y1336 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p7/* .Y1331 */)[(long long)(i43i)]+(_k8_2))))*(5.00000000000000000E-1);
+_p_2 = (signed char*)((p15/* .Y1371 */)+(_k8_1));
+*( double*)((( signed char**)p15/* .Y1371 */)[(long long)(i43i)]+(_k8_2)) = ((*( double*)((( signed char**)p11/* .Y1340 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p13/* .Y1332 */)[(long long)(i43i)]+(_k8_2))))*(5.00000000000000000E-1);
+*( double*)((( signed char**)p19/* .Y1364 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p9/* .Y1351 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p17/* .Y1277 */)[(long long)(i43i)]+(_k8_2)));
+*( double*)((( signed char**)p23/* .Y1384 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p15/* .Y1371 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p21/* .Y1281 */)[(long long)(i43i)]+(_k8_2)));
+_BB_10: ;
+i40s = (((int)gridDim.x)*(64))+((int)(i40s));
+if( ((unsigned int)(i40s)<(unsigned int)((tc12)*(tc13))))  goto _BB_9;
+_BB_7: ;
+}
+extern "C" __global__ __launch_bounds__(64) void
+main_158_gpu(
+    unsigned int tc14,
+    unsigned int tc15,
+    signed char* __restrict__ p5/* .Y1336 */,
+    signed char* __restrict__ p7/* .Y1331 */,
+    signed char* __restrict__ p9/* .Y1352 */,
+    signed char* __restrict__ p11/* .Y1340 */,
+    signed char* __restrict__ p13/* .Y1332 */,
+    signed char* __restrict__ p15/* .Y1372 */,
+    signed char* __restrict__ p17/* .Y1277 */,
+    signed char* __restrict__ p19/* .Y1364 */,
+    signed char* __restrict__ p21/* .Y1281 */,
+    signed char* __restrict__ p23/* .Y1384 */)
+{
+int _i_1, _i_2;
+long long _k8_1, _k8_2;
+signed char* _p_1, *_p_2;
+unsigned int i40s;
+unsigned int i41i;
+unsigned int i42i;
+unsigned int i43i;
+i40s = 0;
+if( ((unsigned int)(0)>=(unsigned int)((tc14)*(tc15))))  goto _BB_7;
+_BB_9: ;
+_i_1 = ((((int)blockIdx.x)*(64))+((int)threadIdx.x))+((int)(i40s));
+i42i = _i_1;
+_i_2 = (_i_1)/(tc14);
+i41i = (_i_1)-((_i_2)*(tc14));
+i43i = _i_2;
+if( ((unsigned int)(i40s)>=(unsigned int)((tc14)*(tc15))))  goto _BB_10;
+if( ((unsigned int)(i42i)>=(unsigned int)((tc14)*(tc15))))  goto _BB_10;
+_k8_1 = ((long long)(i43i))*(8LL);
+_k8_2 = ((long long)(i41i))*(8LL);
+_p_1 = (signed char*)((p9/* .Y1352 */)+(_k8_1));
+*( double*)((( signed char**)p9/* .Y1352 */)[(long long)(i43i)]+(_k8_2)) = ((*( double*)((( signed char**)p5/* .Y1336 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p7/* .Y1331 */)[(long long)(i43i)]+(_k8_2))))*(5.00000000000000000E-1);
+_p_2 = (signed char*)((p15/* .Y1372 */)+(_k8_1));
+*( double*)((( signed char**)p15/* .Y1372 */)[(long long)(i43i)]+(_k8_2)) = ((*( double*)((( signed char**)p11/* .Y1340 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p13/* .Y1332 */)[(long long)(i43i)]+(_k8_2))))*(5.00000000000000000E-1);
+*( double*)((( signed char**)p19/* .Y1364 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p17/* .Y1277 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p9/* .Y1352 */)[(long long)(i43i)]+(_k8_2)));
+*( double*)((( signed char**)p23/* .Y1384 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p21/* .Y1281 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p15/* .Y1372 */)[(long long)(i43i)]+(_k8_2)));
+_BB_10: ;
+i40s = (((int)gridDim.x)*(64))+((int)(i40s));
+if( ((unsigned int)(i40s)<(unsigned int)((tc14)*(tc15))))  goto _BB_9;
+_BB_7: ;
+}
+extern "C" __global__ __launch_bounds__(64) void
+main_176_gpu(
+    unsigned int tc16,
+    unsigned int tc17,
+    signed char* __restrict__ p5/* .Y1336 */,
+    signed char* __restrict__ p7/* .Y1331 */,
+    signed char* __restrict__ p9/* .Y1356 */,
+    signed char* __restrict__ p11/* .Y1340 */,
+    signed char* __restrict__ p13/* .Y1332 */,
+    signed char* __restrict__ p15/* .Y1376 */,
+    signed char* __restrict__ p17/* .Y1277 */,
+    signed char* __restrict__ p19/* .Y1364 */,
+    signed char* __restrict__ p21/* .Y1281 */,
+    signed char* __restrict__ p23/* .Y1384 */)
+{
+int _i_1, _i_2;
+long long _k8_1, _k8_2;
+signed char* _p_1, *_p_2;
+unsigned int i40s;
+unsigned int i41i;
+unsigned int i42i;
+unsigned int i43i;
+i40s = 0;
+if( ((unsigned int)(0)>=(unsigned int)((tc16)*(tc17))))  goto _BB_7;
+_BB_9: ;
+_i_1 = ((((int)blockIdx.x)*(64))+((int)threadIdx.x))+((int)(i40s));
+i42i = _i_1;
+_i_2 = (_i_1)/(tc16);
+i41i = (_i_1)-((_i_2)*(tc16));
+i43i = _i_2;
+if( ((unsigned int)(i40s)>=(unsigned int)((tc16)*(tc17))))  goto _BB_10;
+if( ((unsigned int)(i42i)>=(unsigned int)((tc16)*(tc17))))  goto _BB_10;
+_k8_1 = ((long long)(i43i))*(8LL);
+_k8_2 = ((long long)(i41i))*(8LL);
+_p_1 = (signed char*)((p9/* .Y1356 */)+(_k8_1));
+*( double*)((( signed char**)p9/* .Y1356 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p5/* .Y1336 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p7/* .Y1331 */)[(long long)(i43i)]+(_k8_2)));
+_p_2 = (signed char*)((p15/* .Y1376 */)+(_k8_1));
+*( double*)((( signed char**)p15/* .Y1376 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p11/* .Y1340 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p13/* .Y1332 */)[(long long)(i43i)]+(_k8_2)));
+*( double*)((( signed char**)p19/* .Y1364 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p17/* .Y1277 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p9/* .Y1356 */)[(long long)(i43i)]+(_k8_2)));
+*( double*)((( signed char**)p23/* .Y1384 */)[(long long)(i43i)]+(_k8_2)) = (*( double*)((( signed char**)p21/* .Y1281 */)[(long long)(i43i)]+(_k8_2)))+(*( double*)((( signed char**)p15/* .Y1376 */)[(long long)(i43i)]+(_k8_2)));
+_BB_10: ;
+i40s = (((int)gridDim.x)*(64))+((int)(i40s));
+if( ((unsigned int)(i40s)<(unsigned int)((tc16)*(tc17))))  goto _BB_9;
+_BB_7: ;
+}
+extern "C" __global__ __launch_bounds__(64) void
+main_193_gpu(
+    unsigned int tc18,
+    unsigned int tc19,
+    signed char* __restrict__ p4/* rho_real */,
+    signed char* __restrict__ p6/* .Y1336 */,
+    signed char* __restrict__ p8/* .Y1331 */,
+    signed char* __restrict__ p10/* .Y1356 */,
+    signed char* __restrict__ p12/* .Y1352 */,
+    signed char* __restrict__ p14/* .Y1351 */,
+    signed char* __restrict__ p15/* rho_imag */,
+    signed char* __restrict__ p17/* .Y1340 */,
+    signed char* __restrict__ p19/* .Y1332 */,
+    signed char* __restrict__ p21/* .Y1376 */,
+    signed char* __restrict__ p23/* .Y1372 */,
+    signed char* __restrict__ p25/* .Y1371 */)
+{
+int _i_1, _i_2;
+long long _k8_1, _k8_2;
+double _d_1, _d_2;
+signed char* _p_1, *_p_2;
+unsigned int i42s;
+unsigned int i43i;
+unsigned int i44i;
+unsigned int i45i;
+i42s = 0;
+if( ((unsigned int)(0)>=(unsigned int)((tc18)*(tc19))))  goto _BB_7;
+_BB_9: ;
+_i_1 = ((((int)blockIdx.x)*(64))+((int)threadIdx.x))+((int)(i42s));
+i44i = _i_1;
+_i_2 = (_i_1)/(tc18);
+i43i = (_i_1)-((_i_2)*(tc18));
+i45i = _i_2;
+if( ((unsigned int)(i42s)>=(unsigned int)((tc18)*(tc19))))  goto _BB_10;
+if( ((unsigned int)(i44i)>=(unsigned int)((tc18)*(tc19))))  goto _BB_10;
+_k8_1 = ((long long)(i45i))*(8LL);
+_k8_2 = ((long long)(i43i))*(8LL);
+_p_1 = (signed char*)((( signed char**)p4/* rho_real */)[(long long)(i45i)]+(_k8_2));
+_d_1 = (*( double*)((( signed char**)p12/* .Y1352 */)[(long long)(i45i)]+(_k8_2)));
+*( double*)(( signed char*)_p_1) = (*( double*)(( signed char*)_p_1))+((((*( double*)((( signed char**)p6/* .Y1336 */)[(long long)(i45i)]+(_k8_2)))+(*( double*)((( signed char**)p8/* .Y1331 */)[(long long)(i45i)]+(_k8_2))))*(1.66666666666666657E-1))+(((*( double*)((( signed char**)p10/* .Y1356 */)[(long long)(i45i)]+(_k8_2)))*(3.33333333333333315E-1))+(((_d_1+_d_1)*(3.33333333333333315E-1))+((*( double*)((( signed char**)p14/* .Y1351 */)[(long long)(i45i)]+(_k8_2)))*(3.33333333333333315E-1)))));
+_p_2 = (signed char*)((( signed char**)p15/* rho_imag */)[(long long)(i45i)]+(_k8_2));
+_d_2 = (*( double*)((( signed char**)p23/* .Y1372 */)[(long long)(i45i)]+(_k8_2)));
+*( double*)(( signed char*)_p_2) = (*( double*)(( signed char*)_p_2))+((((*( double*)((( signed char**)p17/* .Y1340 */)[(long long)(i45i)]+(_k8_2)))+(*( double*)((( signed char**)p19/* .Y1332 */)[(long long)(i45i)]+(_k8_2))))*(1.66666666666666657E-1))+(((*( double*)((( signed char**)p21/* .Y1376 */)[(long long)(i45i)]+(_k8_2)))*(3.33333333333333315E-1))+(((_d_2+_d_2)*(3.33333333333333315E-1))+((*( double*)((( signed char**)p25/* .Y1371 */)[(long long)(i45i)]+(_k8_2)))*(3.33333333333333315E-1)))));
+_BB_10: ;
+i42s = (((int)gridDim.x)*(64))+((int)(i42s));
+if( ((unsigned int)(i42s)<(unsigned int)((tc18)*(tc19))))  goto _BB_9;
+_BB_7: ;
+}

@@ -76,7 +76,6 @@ To better understand the secular Redfield approximation for propagating excitoni
 
 In particular we found that, as suggested by the form of the equation, the computation of the density matrix update in the secular Redfield approximation can be well divided into two major contributions, the commutator with the Hamiltonian and the action of the Lindblad operator on the density matrix. 
 
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature #1: Optimization of algorithm to reduce cost and improve accuracy
 
 
 While naively all three matrices, the Hamiltonian H, the density matrix rho and the transition matrices V are complex valued we found that the complex phase can be omitted for the Hamiltonian and the transition matrices, which allows us to implement these matrices as purely real valued. 
@@ -99,7 +98,7 @@ In addition, we encountered one major problem with the Euler integration scheme.
 
 
 
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Preparations for a more efficient and more accurate implementation 
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature #1: Preparations for a more efficient and more accurate implementation 
 
 
 We observed that a relatively cheap Euler integration scheme is too inaccurate and we identified a number of actions we can take to optimize the algorithm. However, even with the expected improvements from the optimizations we encountered large runtimes in the Python implementation. Along with the implementation of the proposed optimization we therefore also translated the code into C to further improve runtimes. 
