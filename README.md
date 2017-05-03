@@ -257,25 +257,31 @@ Using OpenMP, we "collapsed" or unrolled the two outer loops and tested differen
 **Figure:** Scaling of matrix-matrix multiplication using multiple threads. Though not very close to the ideal curve, generally, adding more threads led to better scaling.
 
 
-Above are performance plots from testing out various matrix sizes with different number of threads. Generally, we note that a greater number of threads led to faster runtimes and better scaling. However, simply adding more threads does not lead to favorable performance due to overheads. Thus, one should check that the matrix size is large enough such that the use of more threads is effective. Currently, our Redfield code can work well for relatively small Hamiltonian sizes, but further optimizations including use of OpenMP for stronger scaling may eventually allow us to run the entire calculation for much larger systems for longer time scales.
+Above are performance plots from testing out various matrix sizes with different number of threads. Generally, we note that a greater number of threads led to faster runtimes and better scaling. However, simply adding more threads does not lead to favorable performance due to overheads. Thus, one should check that the matrix size is large enough such that the use of more threads is effective.
+
+
+For a more thorough investigation, we decided to take the matrix-matrix multiplication implementation above and run a single iteration of the Lindblad term (recall that this is the second term of the Redfield equations that involve many matrix operations), which was shown to be the bottleneck of the overall computation. This single iteration still involved 15*N^3 matrix-matrix multiplication operations, and we hoped to observe significant speedups using OpenMP and blocking.
+
+<center>
+<img src="Graphics/runtimes_singleLindblad.png" width="400">
+</center>
+
+**Figure:** Runtimes [s] from a single iteration of the Lindblad term. 
+
+<center>
+<img src="Graphics/speedup_singleLindblad.png" width="400">
+</center>
+
+**Figure:** Speedups from using OpenMP and blocking.
+
+Based on running calculations for matrix sizes 16, 32, 48, and 64, we already see significant speedups using OpenMP and blocking. We believe much of the speedups we observe are from the blocking implementation as these matrix sizes are too small to benefit from multithreading. According to the speedup plots, using more threads led to speedups but these were less than the speedups observed when using fewer threads.
 
 
 
 
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Conclusion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+We were able to implement and parallelize the Redfield equations using various methods including algorithm optimization, use of low-level language, and uses of various parallelization models. Currently, our Redfield code can work well for relatively small Hamiltonian sizes, but further optimizations including effective use of OpenMP for stronger scaling may eventually allow us to run the entire calculation for much larger systems for longer time scales.
 
 
 
