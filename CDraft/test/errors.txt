@@ -1,2 +1,0 @@
-srun: job 85532799 queued and waiting for resources
-srun: job 85532799 has been allocated resources

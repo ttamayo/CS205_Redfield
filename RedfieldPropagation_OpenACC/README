@@ -1,0 +1,27 @@
+Routines for propagating an open quantum system according to the secular Redfield equations
+- author: Florian Hase
+
+
+Contains the following files:
+- main.c              ... main routine
+- liouville.c         ... computes density matrix updates
+- rates.c             ... computes transition rates and transition matrices
+- headers.h           ... communicates routines across files
+- utilities.c         ... helper routines (mostly parameter definitions)
+- run_redfield_serial ... precompiled executable
+
+
+Compile serial version with:
+   gcc *.c -llapack -lm
+
+
+Compile OpenACC parallel version for GPU with:
+   pgcc -acc *.c -lblas  -llapack  -lm -lpgftnrtl -lrt  -ta=nvidia:cc35,nocache -Msafeptr -Minfo=all
+
+
+Environmental variables for running on odyssey
+	export PGI=/n/seasfs03/IACS/cs205/pgi
+	export PATH=$PGI/linux86-64/16.10/bin:$PATH
+	export MANPATH=$MANPATH:$PGI/linux86-64/16.10/man
+	export LM_LICENSE_FILE=$LM_LICENSE_FILE:$PGI/license.dat
+

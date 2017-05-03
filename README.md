@@ -7,7 +7,7 @@ The critical process of energy harvesting in solar cells is to quickly convert e
 
 
 <center>
-<img src="files/FMO.png" width="400">
+<img src="Graphics/FMO.png" width="400">
 </center> 
 
 
@@ -61,20 +61,23 @@ To better understand the secular Redfield approximation for propagating excitoni
 
 
 <center>
-<img src="files/python_population_euler.png" width="400">
+<img src="Graphics/python_population_euler.png" width="400">
 </center>
 
 **Figure:** Population dynamics in Python with Euler integration (1 fs time step) for four excitonic sites (1 to 4), a loss state (0) and a target state (5). The sum of the population over all states is plotted as a reference (total) and remains constant during the simulation, in agreement with properties of the underlying differential equation. The excited state is quickly distributed among the four sites and then slowly decays into loss and target states. The long term behavior matches the physical expectation of thermalized excited states.
 
 
 <center>
-<img src="files/runtimes.png" width="400"><img src="files/runtimes_loglog.png" width="400">
+<img src="Graphics/runtimes.png" width="400"><img src="Graphics/runtimes_loglog.png" width="400">
 </center>
 
 **Figure:** Runtimes of two naive Python implementations. Excitonic systems of size (n x n) were propagated for 10 integration steps with a simple Euler integration. Scalings of both, a naive Python implementation and a vectorized Python implementation, are as expected. 
 
 
 In particular we found that, as suggested by the form of the equation, the computation of the density matrix update in the secular Redfield approximation can be well divided into two major contributions, the commutator with the Hamiltonian and the action of the Lindblad operator on the density matrix. 
+
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature #1: Optimization of algorithm to reduce cost and improve accuracy
+
 
 While naively all three matrices, the Hamiltonian H, the density matrix rho and the transition matrices V are complex valued we found that the complex phase can be omitted for the Hamiltonian and the transition matrices, which allows us to implement these matrices as purely real valued. 
 
@@ -88,7 +91,7 @@ In addition, we encountered one major problem with the Euler integration scheme.
 
 
 <center>
-<img src="files/python_population_euler_going_wrong.png" width="400">
+<img src="Graphics/python_population_euler_going_wrong.png" width="400">
 </center>
 
 **Figure:** Population dynamics in Python with Euler integration (1 fs time step) for four excitonic sites (1 to 4), a loss state (0) and a target state (5) as before, except for zero couplings to the environment. Clearly the Euler integrator cannot maintain physically reasonable population numbers between 0 and 1, which indicates that more sophisticated integration schemes need to be employed for accurate time evolution.
@@ -117,13 +120,13 @@ However, due to the inaccurate Euler integration we were also forced to go to a 
 
 
 <center>
-<img src="files/RungeKutta_test.png" width="400">
+<img src="Graphics/RungeKutta_test.png" width="400">
 </center> 
 
 **Figure:** Population dynamics in C with 4th order Runge-Kutta integration (1 fs time step) without coupling to the environment. We observe oscillations between the excitonic states as expected and see that the peak in the population of the initial site returns to 1 throughout the course of the simulation as opposed to the Euler integration. 
 
 <center>
-<img src="files/runtimes_C.png" width="400">
+<img src="Graphics/runtimes_C.png" width="400">
 </center> 
 
 **Figure:** Runtimes for 10 Runge-Kutta integration steps of the Redfield equations implemented in C using the features discussed above. We observe a significant performance improvement over the Python implementation. However, due to the scaling of the algorithm (<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a>) we are still not able to go to larger problem sizes. 
@@ -172,7 +175,7 @@ and parallelize the summation over <a href="https://www.codecogs.com/eqnedit.php
 We observe a significant improvement of runtimes with this parallelization scheme over the serial implementation of the code. 
 
 <center>
-<img src="files/benchmark.png" width="400">
+<img src="Graphics/benchmark.png" width="400">
 </center> 
 
 **Figure:** Runtimes of 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. Displayed are runtimes for the serial C implementation and the SIMT model with OpenACC directives on the C code. Simulations were run on a NVIDIA Tesla K80 GPU. Due to the computational demand of serial simulations fewer points are shown, indicating that the parallization allows us to go to larger problem sizes in reasonable time. 
@@ -181,13 +184,13 @@ We observe a significant improvement of runtimes with this parallelization schem
 As displayed in the benchmark plot above we achieve significantly smaller runtimes with the parallelized code, which allows us to compute the population dynamics in much larger excitonic systems. 
 
 <center>
-<img src="files/speedup.png" width="400">
+<img src="Graphics/speedup.png" width="400">
 </center> 
 
 **Figure:** Speedups for 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. We compared runtimes of the serial C implementation to the OpenACC parallelized implementation. Speedups could only be computed for problem sizes for which serial runtimes were available. Due to the FLOPs per second graph recorded for the GPU and the rather constant FLOPs per second for the CPU it is expected that we can achieve speedups up to roughly a factor of 100 for larger problem sizes (resulting in about 5 days of runtime for 10 iterations of 80 x 80 matrices on a single CPU).
 
 <center>
-<img src="files/flops.png" width="400">
+<img src="Graphics/flops.png" width="400">
 </center> 
 
 **Figure:** Lower bound on the throughput of the GPU. A single NVIDIA Tesla K80 is expected to achieve a maximum 0.9 TFLOPS throughput. The lower bound on the throughput was calculated by counting the number of additions and multiplications to be performed during the computation. 
@@ -195,7 +198,7 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 
 <center>
-<img src="files/population_dynamics_openacc_16.png" width="400">
+<img src="Graphics/population_dynamics_openacc_16.png" width="400">
 </center> 
 
 
@@ -204,41 +207,81 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 
 
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Features: OpenMP implementation
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature #2: Stronger Scaling via OpenMP
 
-To explore other parallelization models besides OpenACC, we implemented our code using OpenMP, which supports shared memory multiprocessing programming. As mentioned earlier, we focused on parallelizing the propagation of the density matrix for precomputed Hamiltonians and Lindblad operators. To determine the optimal number of threads, we implemented a simple matrix-matrix multiplication code and plotted OpenMP's performance considering various Hamiltonian sizes and number of threads:
+As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations would help reduce the runtimes and improve scalability. 
+
+We implemented matrix-matrix multiplication using blocking, shown to be robust for large matrix sizes, and OpenMP which supports shared memory multiprocessing programming. Below is the code listing for the blocked matrix-matrix multiplication implementation:
+
+```
+#pragma omp parallel for shared(A,B,C) private(i, j, ii, jj, k) schedule(auto) collapse(2) num_threads(8)
+for (i = 0; i < SIZE; i += BLOCK_SIZE) {
+	for (j = 0; j < SIZE; j += BLOCK_SIZE) {
+		for (ii = 0; ii < BLOCK_SIZE; ii += 1) {
+                	for (jj = 0; jj < BLOCK_SIZE; jj += 1) {
+                        	index = ii + i;
+                                jndex = jj + j;
+                                if (index < SIZE && jndex < SIZE) {
+                                	temp = 0.;
+                                        for (k = 0; k < SIZE; k++) {
+                                        	temp += A[index][k] * B[k][jndex];
+                                        }
+                                        C[index][jndex] = temp;
+                                }
+              		}
+        	}	
+	}
+}
+```
+
+Using OpenMP, we "collapsed" or unrolled the two outer loops and tested different numbers of threads to work on portions of the overall operation. In addition, various Hamiltonian sizes were considered to determine the conditions that would give us the best performance for large system sizes and long time scales.
+
 
 <center>
-<img src="Graphics/runtimes_openmp_mm.png" width="400">
+<img src="Graphics/runtimes_openmp.png" width="400">
 </center> 
 
-<center>
-<img src="Graphics/speedup_openmp_mm.png" width="400">
-</center>
+**Figure:** Runtimes [seconds] of matrix-matrix multiplication using multithreading via OpenMP. Generally, adding more threads led to faster runtimes.
 
 <center>
-<img src="Graphics/scaling_openmp_mm.png" width="400">
+<img src="Graphics/speedup_openmp.png" width="400">
 </center>
 
-We can see from the performance plots that simply increasing the number of threads does not improve performance. In addition, for smaller matrix sizes (<100), which is the size we're primarily interested in, using 2 or more threads led to worse performance. However, using OpenMP with a single thread is comparable to using the serial code. Therefore, more consideration may be needed to effectively apply OpenMP for our problem.
+**Figure:** Speedups of matrix-matrix multiplication using multiple threads. We can see that the use of 10 threads is better justified for larger system sizes.
+
+
+<center>
+<img src="Graphics/scaling_openmp.png" width="400">
+</center>
+
+**Figure:** Scaling of matrix-matrix multiplication using multiple threads. Though not very close to the ideal curve, generally, adding more threads led to better scaling.
+
+
+Above are performance plots from testing out various matrix sizes with different number of threads. Generally, we note that a greater number of threads led to faster runtimes and better scaling. However, simply adding more threads does not lead to favorable performance due to overheads. Thus, one should check that the matrix size is large enough such that the use of more threads is effective.
+
+
+For a more thorough investigation, we decided to take the matrix-matrix multiplication implementation above and run a single iteration of the Lindblad term (recall that this is the second term of the Redfield equations that involve many matrix operations), which was shown to be the bottleneck of the overall computation. This single iteration still involved 15*N^3 matrix-matrix multiplication operations, and we hoped to observe significant speedups using OpenMP and blocking.
+
+<center>
+<img src="Graphics/runtimes_singleLindblad.png" width="400">
+</center>
+
+**Figure:** Runtimes [s] from a single iteration of the Lindblad term. 
+
+<center>
+<img src="Graphics/speedup_singleLindblad.png" width="400">
+</center>
+
+**Figure:** Speedups from using OpenMP and blocking.
+
+Based on running calculations for matrix sizes 16, 32, 48, and 64, we already see significant speedups using OpenMP and blocking. We believe much of the speedups we observe are from the blocking implementation as these matrix sizes are too small to benefit from multithreading. According to the speedup plots, using more threads led to speedups but these were less than the speedups observed when using fewer threads.
 
 
 
 
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Conclusion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+We were able to implement and parallelize the Redfield equations using various methods including algorithm optimization, use of low-level language, and uses of various parallelization models. Currently, our Redfield code can work well for relatively small Hamiltonian sizes, but further optimizations including effective use of OpenMP for stronger scaling may eventually allow us to run the entire calculation for much larger systems for longer time scales.
 
 
 

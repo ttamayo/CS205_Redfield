@@ -15,6 +15,7 @@
  *
  */
 
+//********************************************************************//
 // loading all modules
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +25,7 @@
 //********************************************************************//
 // defining global variables 
 
-#define NSITES 62			 // number of excitonic sites to be modeled
+#define NSITES 4			 // number of excitonic sites to be modeled
 #define dt 1.0				 // integration time step in fs
 #define number_of_steps 10   // number of integration time steps
 #define BLOCK_SIZE 16        // size for blocked matrix operations
@@ -218,6 +219,7 @@ int main(void) {
 						if (index < SIZE && jndex < SIZE) {
 		                       	         	k1_real[index][jndex] = (comm_real[index][jndex] + lindblad_real[index][jndex]) * dt / 2.;
        		                       			k1_imag[index][jndex] = (comm_imag[index][jndex] + lindblad_imag[index][jndex]) * dt / 2.;
+       		                       			// h1 primes the next Runge Kutta step
                 		                	h1_real[index][jndex] = rho_real[index][jndex] + k1_real[index][jndex];
                         		        	h1_imag[index][jndex] = rho_imag[index][jndex] + k1_imag[index][jndex];
 						}
@@ -225,13 +227,11 @@ int main(void) {
 				}
 			}		
 
-		//=== get k2 ===//
-		
-//		printf("getting k2\n");
-//		#pragma acc update host(h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 
+		//=== getting Runge Kutta k2 ===//
+		// ... compute density matrix update
 		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
-                
+		// ... compute k1 in blocked matrix operations
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 		#pragma acc loop independent collapse(2)
                 for (ii = 0; ii < SIZE; ii += BLOCK_SIZE)
@@ -244,6 +244,7 @@ int main(void) {
                                                 if (index < SIZE && jndex < SIZE) {
                                                         k2_real[index][jndex] = (comm_real[index][jndex] + lindblad_real[index][jndex]) * dt / 2.;
                                                         k2_imag[index][jndex] = (comm_imag[index][jndex] + lindblad_imag[index][jndex]) * dt / 2.;
+                                                        // h1 primes the next Runge Kutta step
                                                         h1_real[index][jndex] = rho_real[index][jndex] + k2_real[index][jndex];
                                                         h1_imag[index][jndex] = rho_imag[index][jndex] + k2_imag[index][jndex];
                                                 }
@@ -251,10 +252,10 @@ int main(void) {
                                 }
                         }
 
-		//=== get k3 ===//
-
+        //=== getting Runge Kutta k3 ===//
+        // ... compute density matrix update
 		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
-
+		// ... compute k3 in blocked matrix operations
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
                 #pragma acc loop independent collapse(2)
                 for (ii = 0; ii < SIZE; ii += BLOCK_SIZE)
@@ -267,6 +268,7 @@ int main(void) {
                                                 if (index < SIZE && jndex < SIZE) {
                                                         k3_real[index][jndex] = (comm_real[index][jndex] + lindblad_real[index][jndex]) * dt;
                                                         k3_imag[index][jndex] = (comm_imag[index][jndex] + lindblad_imag[index][jndex]) * dt;
+                                                        // h1 primes the next Runge Kutta step
                                                         h1_real[index][jndex] = rho_real[index][jndex] + k3_real[index][jndex];
                                                         h1_imag[index][jndex] = rho_imag[index][jndex] + k3_imag[index][jndex];
                                                 }
@@ -274,67 +276,61 @@ int main(void) {
                                 }
                         }
 
-		//=== get k4 ===//
-
+        //=== getting Runge Kutta k4 ====//
+        // ... compute density matrix update
 		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
-
-                #pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE], k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE])
-                #pragma acc loop independent collapse(2)
-                for (ii = 0; ii < SIZE; ii += BLOCK_SIZE)
-                        for (jj = 0; jj < SIZE; jj += BLOCK_SIZE) {
-                                #pragma acc loop independent collapse(2)
-                                for (i = 0; i < BLOCK_SIZE; i++) {
-                                        for (j = 0; j < BLOCK_SIZE; j++) {
-                                                index = ii + i;
-                                                jndex = jj + j;
-                                                if (index < SIZE && jndex < SIZE) {
-							rho_real[index][jndex] += k1_real[index][jndex] / 3. + 2 * k2_real[index][jndex] / 3. + k3_real[index][jndex] / 3. + (comm_real[index][jndex] + lindblad_real[index][jndex]) * dt / 6.;
-							rho_imag[index][jndex] += k1_imag[index][jndex] / 3. + 2 * k2_imag[index][jndex] / 3. + k3_imag[index][jndex] / 3. + (comm_imag[index][jndex] + lindblad_imag[index][jndex]) * dt / 6.;
+		// ... compute the new density matrix (still in exciton basis)
+        #pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k3_real[0:SIZE][0:SIZE], k3_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE], k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE])
+        #pragma acc loop independent collapse(2)
+        for (ii = 0; ii < SIZE; ii += BLOCK_SIZE)
+                for (jj = 0; jj < SIZE; jj += BLOCK_SIZE) {
+                        #pragma acc loop independent collapse(2)
+                        for (i = 0; i < BLOCK_SIZE; i++) {
+                                for (j = 0; j < BLOCK_SIZE; j++) {
+                                        index = ii + i;
+                                        jndex = jj + j;
+                                        if (index < SIZE && jndex < SIZE) {
+                                        		// combining all Runge Kutta contributions
+												rho_real[index][jndex] += k1_real[index][jndex] / 3. + 2 * k2_real[index][jndex] / 3. + k3_real[index][jndex] / 3. + (comm_real[index][jndex] + lindblad_real[index][jndex]) * dt / 6.;
+												rho_imag[index][jndex] += k1_imag[index][jndex] / 3. + 2 * k2_imag[index][jndex] / 3. + k3_imag[index][jndex] / 3. + (comm_imag[index][jndex] + lindblad_imag[index][jndex]) * dt / 6.;
 						}
 					}
 				}
 			}
-//		} // end kernels
 
+		// send new density matrix back to CPU for read out
 		#pragma acc update host(rho_real[0:SIZE][0:SIZE])
 
-
+		// let host rotate density matrix back into site basis
 		transpose(eigVects, SIZE);
 		rotate(rho_real, eigVects, SIZE);
 		rotate(rho_imag, eigVects, SIZE);
 		transpose(eigVects, SIZE);
 
-
-	total = 0;
-	printf("%d ", step);
-        for (i = 0; i < SIZE; i++) {
-            printf("%.10f ", rho_real[i][i]);
-		total += rho_real[i][i];
+		// print new density matrix
+		// ... we print only diagonal elements
+		// ... i,i-th element denotes population at i-th site
+		total = 0;
+		printf("%d ", step);
+  		for (i = 0; i < SIZE; i++) {
+            	printf("%.10f ", rho_real[i][i]);
+				total += rho_real[i][i];
         }
-	printf("%.10f ", total);
+		printf("%.10f ", total);
         printf("\n");
 
+        // rotate back into exciton basis
         rotate(rho_real, eigVects, SIZE);
         rotate(rho_imag, eigVects, SIZE);
-
-
+        // ... and continue with the propagation
 	}
 
-// 		free((void*) comm_real);
-//        free((void*) comm_imag);
-//        free((void*) lindblad_real);
-//        free((void*) lindblad_imag);
-
-        toc = clock();
-
-    // Analyze time elapsed
+    toc = clock();
+    // Report elapsed time after finishing the propagation
     double time_spent = (double)(toc - tic) / CLOCKS_PER_SEC;
     printf("\n# RESULTS:\n");
     printf("# --------\n");
     printf("# Time Elapsed: %f seconds\n\n", time_spent);
-// acc data present(h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE], k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], rho_real[0:SIZE], rho_imag[0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
-
-
 
 	return 0;
 }
