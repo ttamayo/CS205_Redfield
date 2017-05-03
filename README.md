@@ -76,6 +76,9 @@ To better understand the secular Redfield approximation for propagating excitoni
 
 In particular we found that, as suggested by the form of the equation, the computation of the density matrix update in the secular Redfield approximation can be well divided into two major contributions, the commutator with the Hamiltonian and the action of the Lindblad operator on the density matrix. 
 
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature #1: Optimization of algorithm to reduce cost and improve accuracy
+
+
 While naively all three matrices, the Hamiltonian H, the density matrix rho and the transition matrices V are complex valued we found that the complex phase can be omitted for the Hamiltonian and the transition matrices, which allows us to implement these matrices as purely real valued. 
 
 Furthermore, there is no reason to compute the exciton dynamics in the site bases, in which Hamiltonian and density matrix are non-diagonal. Instead, we found that as the diagonalization of the Hamiltonian is necessary anyways to compute the transition matrices, one can very well compute the time evolution of the density matrix in the eigenbasis of the Hamiltonian to further reduce the computational cost of evaluating the commutator. 
@@ -204,7 +207,7 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 
 
-## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature: Stronger Scaling via OpenMP
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature #2: Stronger Scaling via OpenMP
 
 As noted from the previous implementions, we noted that the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations would help reduce the runtimes and improve scalability. 
 
