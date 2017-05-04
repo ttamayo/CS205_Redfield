@@ -147,16 +147,33 @@ However, due to the inaccurate Euler integration we were also forced to go to a 
 
 
 
-
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Towards an accelerated implementation: Computing Redfield in the SIMT model
 
-Encouraged by the speed up we already observed by translating the code from Python to C we wanted to make use of the computational power of GPUs and speed up the code even further by parallelizing the propagation step, in particular the highly demanding computation of the Lindblad operator term in the Redfield equation. 
+Encouraged by the speedup we saw by converting the code from a not well performing Python implementation to a significantly faster C implementation we found ourselves in a situation in which we could compute exciton population dynamics for systems containing about 30 excitonic sites reasonably well.  However, to reach our stated goal of going beyond the currently accessible system size we went further and employed several parallelization schemes to accelerate the computational demanding parts of the Redfield equation. 
 
-We used OpenACC to apply the SIMT execution model on our already implemented C code and compute the time evolution of excitonic systems under the Redfield approximation on GPUs. All results shown for the SIMT OpenACC implementation were obtained on a NVIDIA Tesla K80 GPU. 
+In a first approach we applied the SIMT execution model to our problem by parallelizing our C code with OpenACC directives for execution on a single GPU. All results presented in this section were obtained from calculations on a NVIDIA Tesla K80 GPU.
 
-Communication between the CPU and the GPU was minimized by copying all variables to the GPU before starting the integration protocol. Only the updated density matrix was copied back to the CPU after every integration step. All other quantities were left on the GPU for the duration of the computation. 
+With the two separate terms of the Redfield equation in mind, the commutator of the density matrix with the Hamiltonian and the Lindblad term, observed that all quantities in the Redfield equation except for the density matrix remain unchanged during all propagation steps. 
 
-To use the computational capabilities of the GPU efficiently we added parallelization directives to all occurring loops in the algorithm. Matrix operations were blocked to make use of the fast memory of the GPU. The blocked instructions for computing the commutator are shown below.
+<center>
+<img src="Graphics/labeled_redfield_equation.png" width="600">
+</center>
+
+**Equation** Density matrix master equation for open quantum systems in the secular Redfield approximation. 
+
+To achieve high speedups compared to a serial implementation and use the GPU efficiently we therefore tried to keep the communication between the CPU and the GPU at the minimum and make use of the 12 GB memory on the Tesla K80 GPUs. 
+
+With this amount of memory on the device we were able to precompute all constant quantities in the Redfield equations before starting the propagation, copy them onto the GPU and leave them there for the entire computation. In particular, we performed the following computations on the CPU before starting to propagate on the GPU: 
+
+* Diagonalize the Hamiltonian using Lapack and store eigenvalues and eigenvectors
+* Compute transition rates <a href="https://www.codecogs.com/eqnedit.php?latex=\gamma" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\gamma" title="\gamma" /></a> on the CPU from parameters provided by the user. The transition rates depend on three different indices, m, M and N, and were all stored in a three dimensional tensore of size (n+2) x (n+2) x (n+2) with n denoting the number of excitonic sites in the system. 
+* Compute the transition matrices V on the CPU. The transition matrices V depend on two indices, M and N, running over the number of excitonic sites in the system and can be obtained from the eigenvectors of the Hamiltonian. Transition matrices were stored in a four dimensional tensor
+
+Both, Hamiltonian and transition matrices could be stored as real matrices due to the phase ambiguity in the equation. Transpose operations were implemented implicitly by using the proper indexing in matrix multiplications. 
+
+As the commutator in the Redfield equation scales as <a href="https://www.codecogs.com/eqnedit.php?latex=N^4" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^4" title="N^4" /></a> and the Lindblad term scales as <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a> we decided to compute the contributions of these two terms to the change in the density matrix sequentially, to optimally use the GPU for the computation of the Lindblad term. Nevertheless, we parallelized both of these terms, as well as the individual steps of the Runge-Kutta integration. 
+
+All operations in the code were parallelized on the gang (thread block), worker (warp) and vector (thread) level. We implemented blocked matrix operations to use the fast memory of the GPU. The blocked instructions for computing the commutator are shown below.
 
 ```
 #pragma acc kernels present(hamiltonian[0:N]) present(comm_real[0:N][0:N], comm_imag[0:N][0:N]) present(rho_real[0:N][0:N], rho_imag[0:N][0:N])
@@ -177,12 +194,19 @@ for (ii = 0; ii < N; ii += BLOCK_SIZE)
     }
 }
 ```
+We started our tests with block sizes of 16x16, which is reported to perform best on this GPU. For this block size, we set up a maximum number of 256 vectors which executed the loops within one block, and a total of 4 workers, to parallelize over different blocks. However, we then found for our problem sizes with moderately large matrices that we could improve performance by using block sizes of 8x8 on 64 vectors with 16 workers instead.
 
-Significant speed up could be generated by parallelizing parts of the summation in the Lindblad operator. With size nested for loops in total, three stated explicitly in the sum and another three for matrix operations in the summation term, this term exceeds the number of available levels of parallelization. With moderately large matrices in our problem (between 10 and 100 elements per row) we decided to split the Lindblad term as 
+As expected, we saw the best performance improvement after parallizing the Lindblad term. Due to the highly nested for loops necessary for computing the Lindblad contribution to the change in the density matrix we were not able to parallelize all of the for loops for this calculation. With six nested for loops in total, three stated explicitly in the equation and three additional for matrix operations in the Lindblad operator, this term exceeds the number of levels of parallelization available on the GPU. 
+
+To still use the GPU as efficient as possible, we decided to split the Lindblad term as 
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\sum\limits_{m,M}&space;\sum\limits_{N}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\sum\limits_{m,M}&space;\sum\limits_{N}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" title="\sum\limits_{m,M} \sum\limits_{N} \gamma(\omega_{MN}) \left( V_m(\omega_{MN}) \rho(t) V^\dagger_m(\omega_{MN}) - \frac{1}{2} V_m^\dagger(\omega_{MN}) V_m(\omega_{MN}) \rho(t) - \frac{1}{2} \rho(t) V^\dagger_m(\omega_{MN}) V_m(\omega_{MN}) \right )" /></a>
 
-and parallelize the summation over <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> on the gang (thread block) level and the summation term on the worker and vector level. With block size of 8 we used a total of 64 vectors and 16 workers per thread block and as many thread blocks as sites in the excitonic system. Race conditions were avoided by explicitly creating <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> copies of the transition matrices as well as all matrices which store intermediate results of the Lindblad operator computation. 
+and parallelize the summation over <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> on the gang (thread block) level and the two outer loops for matrix multiplications (one over blocks and another within blocks) on the worker and vector level (please see liouville.c for details). The number of thread blocks was hereby set equal to the number of excitonic sites in the system. 
+
+Parallelization of these sums yields the advantage that we keep a maximum number of threads busy for a maximum time. Each individual thread performs a single reduction in a matrix multiplication, due to which all threads share about the same work load and finish in about the same time. Assigning an entire reduction to a single thread was found to significantly improve performance as opposed to a scheme in which individual matrix operations are parallelized on the gang, worker and vector level and all three explicit sums in the Lindblad term are carried out sequentially. 
+
+Race conditions in this parallelization scheme were avoided by explicitly creating <a href="https://www.codecogs.com/eqnedit.php?latex=N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> copies of the transition matrices as well as all matrices which store intermediate results of the Lindblad operator computation. 
 
 
 We observe a significant improvement of runtimes with this parallelization scheme over the serial implementation of the code. 
@@ -194,13 +218,15 @@ We observe a significant improvement of runtimes with this parallelization schem
 **Figure:** Runtimes of 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. Displayed are runtimes for the serial C implementation and the SIMT model with OpenACC directives on the C code. Simulations were run on a NVIDIA Tesla K80 GPU. Due to the computational demand of serial simulations fewer points are shown, indicating that the parallization allows us to go to larger problem sizes in reasonable time. 
 
 
-As displayed in the benchmark plot above we achieve significantly smaller runtimes with the parallelized code, which allows us to compute the population dynamics in much larger excitonic systems. 
+As displayed in the benchmark plot above we achieve significantly smaller runtimes with the parallelized code, which allows us to compute the population dynamics in much larger excitonic systems. The achieved speedups with the GPU over the serial implementation on the CPU are shown in the plot below.
 
 <center>
 <img src="Graphics/speedup.png" width="400">
 </center> 
 
 **Figure:** Speedups for 10 iterations in the Runge-Kutta integration scheme (1 fs time step) for excitonic systems of different sizes. We compared runtimes of the serial C implementation to the OpenACC parallelized implementation. Speedups could only be computed for problem sizes for which serial runtimes were available. Due to the FLOPs per second graph recorded for the GPU and the rather constant FLOPs per second for the CPU it is expected that we can achieve speedups up to roughly a factor of 100 for larger problem sizes (resulting in about 5 days of runtime for 10 iterations of 80 x 80 matrices on a single CPU).
+
+Unfortunately we quickly ran into large simulation times for the serial implementation, which did not allow us to compute the speedups directly for even larger matrices. Running a ten propagation steps (40 density matrix updates) on a single CPU for 40 excitonic sites already took about three hours with a consistent scaling of <a href="https://www.codecogs.com/eqnedit.php?latex=N^4" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^4" title="N^4" /></a>. Indeed, the GPU allowed us to go beyond what is accessible with just a CPU. The throughput we achieved on the GPU for different problem sizes is shown below. 
 
 <center>
 <img src="Graphics/flops.png" width="400">
@@ -209,13 +235,27 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 **Figure:** Lower bound on the throughput of the GPU. A single NVIDIA Tesla K80 is expected to achieve a maximum 0.9 TFLOPS throughput. The lower bound on the throughput was calculated by counting the number of additions and multiplications to be performed during the computation. 
 
 
+From the throughput plot we observe that we do not use the GPU efficiently for small matrices (< 20x20) but seem to reach our maximum throughput for this implementation for matrices of size 60x60 and larger. We see the reason in the low throughput for small matrices simply in the fact that the algorithm does not contain as many parallelizable operations for small problem sizes as for large problem sizes. 
+
+With a blocking size of 8x8 we can already fill up a warp with a 6x6 density matrix. However, the other available warps on the GPU cannot be utilized for other computations while the density matrix update is calculated, which results in the relatively low throughput. With our blocking scheme we can already use 16 warps with 64 threads each at a problem size of 30x30. The throughput still increases beyond this problem size due to the use of multiple threadblocks, until we fill up the GPU as far as possible with the current implementation. 
+
+The parallel implementation of the Redfield equation now allows us to study large excitonic systems in a reasonable amount of time. The figure below displays the population dynamics of a 16 site system calculated on a GPU in not even 5 % of the runtime on a CPU. 
+
 
 <center>
 <img src="Graphics/population_dynamics_openacc_16.png" width="400">
 </center> 
 
 
-**Figure:** Population dynamics computed with the OpenACC parallelized C code for 16 excitonic sites (matrices of size 18 x 18) for 1000 integration steps in a 4th order Runge Kutta integration. The simulation was run for 164 s on a Tesla K80 GPU.
+**Figure:** Population dynamics computed with the OpenACC parallelized C code for 16 excitonic sites (matrices of size 18 x 18) for 1000 integration steps in a 4th order Runge Kutta integration. The simulation was run for 164 s on a Tesla K80 GPU. The same population dynamics plot could be obtained after about 1 h on a CPU. 
+
+The comparison in runtimes for the serial and GPU implementation of the Redfield equation for the 16 site system is shown below. While the speedup achieved at these problem sizes now allows for high-throughout scans of excitonic systems in the vicinity of actual biological complexes, the even larger speed up for larger problems sizes enables us to study systems beyond natural occurring systems. 
+
+<center>
+<img src="Graphics/openacc_runtime_comparison.png" width="200">
+</center>
+
+**Figure:** Comparison of runtimes for a 16 site system for 1000 Runge Kutta integration steps on a Tesla K80 GPU and a single CPU. 
 
 
 
