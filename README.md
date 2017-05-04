@@ -245,12 +245,6 @@ Using OpenMP, we "collapsed" or unrolled the two outer loops and tested differen
 
 
 <center>
-<img src="Graphics/runtimes_openmp.png" width="400">
-</center> 
-
-**Figure:** Runtimes [seconds] of matrix-matrix multiplication using multithreading via OpenMP. Generally, adding more threads led to faster runtimes.
-
-<center>
 <img src="Graphics/speedup_openmp.png" width="400">
 </center>
 
