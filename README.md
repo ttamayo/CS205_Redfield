@@ -38,10 +38,10 @@ where <a href="https://www.codecogs.com/eqnedit.php?latex=\gamma" target="_blank
 The first term of the differential equation for the density matrix accounts for the time evolution of the excitonic system alone while the second term is used to compute the influence of the environment on the dynamics of the excitonic system. 
 
 <center>
-<img src="Graphics/labeled_redfield_equation.png" width="400">
+<img src="Graphics/labeled_redfield_equation.png" width="500">
 </center>
 
-**Equation** Redfield equation with labeled terms for evolution of system alone (blue) and interaction of system and environment (red).
+**Equation:** Redfield equation with labeled terms for evolution of system alone (blue) and interaction of system and environment (red).
 
 
 Solving this form of the Redfield master equation numerically involves a number of matrix operations. Due to the summation in the second term of the differential equation, from hereon referred to as the Lindblad operator term, a naive algorithm is expected to scale as <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^6" /></a> with <a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N" title="N" /></a> the number of sites in the system.  
