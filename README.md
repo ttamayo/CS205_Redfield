@@ -93,7 +93,7 @@ Regarding the Lindblad operator we noticed that the transition matrices are inde
 
 With all these observations for implementing a faster propagation algorithm we are still left with the three dimensional sum in the Lindblad operator, which remains to be the most expensive piece of the algorithm. We therefore focus our parallelization efforts on this part of the equation. 
 
-In addition, we encountered one major problem with the Euler integration scheme. The coupling to the environment causes a dampening of oscillations in the exciton populations. However, without the Lindblad operator term in the equation, the Euler integrator cannot maintain physically reasonable populations between 0 and 1 as shown in the figure below. 
+In addition, we encountered one major problem with the Euler integration scheme, which is a first order method. The coupling to the environment causes a dampening of oscillations in the exciton populations. However, without the Lindblad operator term in the equation, the Euler integrator cannot maintain physically reasonable populations between 0 and 1 as shown in the figure below. 
 
 
 <center>
@@ -123,7 +123,7 @@ for (i = 0; i < SIZE; i++) {
 
 We also precomputed the transition matrices <a href="https://www.codecogs.com/eqnedit.php?latex=V" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V" title="V" /></a> and implemented matrix transpose operations implictly by using the proper indexing in matrix multiplications. Furthermore we stored as many intermediate results as possible, such as the <a href="https://www.codecogs.com/eqnedit.php?latex=V^\dagger&space;V" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V^\dagger&space;V" title="V^\dagger V" /></a> term in the Lindblad operator, to avoid unnecessary computations. 
 
-However, due to the inaccurate Euler integration we were also forced to go to a 4th order Runge-Kutta integrator to maintain a reasonable level of accuracy in our calculations. The 4th order Runge-Kutta integrator requires the calculation of four density matrix updated per integration step, but this additional computational cost was compensated by the implemented optimizations. The figure below shows the behavior of the 4th order Runge-Kutta integrator over time. We observe, as expected, that the peak height of the initial site is preserved during the simulation. 
+However, due to the inaccurate Euler integration we were also forced to go to a 4th order Runge-Kutta integrator to maintain a reasonable level of accuracy in our calculations (4th order vs. Euler's 1st order). The 4th order Runge-Kutta integrator requires the calculation of four density matrix updated per integration step, but this additional computational cost was compensated by the implemented optimizations. The figure below shows the behavior of the 4th order Runge-Kutta integrator over time. We observe, as expected, that the peak height of the initial site is preserved during the simulation. 
 
 
 <center>
