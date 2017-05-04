@@ -502,7 +502,7 @@ int main(int argc, char *argv[]) {
 	// ... storing intermediate results
 
 	double ****all_Vs[SIZE][SIZE][SIZE][3];											// four dimensional array
-	all_Vs = alloc_4d_double(SIZE,SIZE,SIZE,3);
+	all_Vs = alloc_4d_double(SIZE,SIZE,SIZE,SIZE);
 
 	double ***reduction_intermediates;							// three dimensional array
 	reduction_intermediates = alloc_3d_double(SIZE,SIZE,SIZE);
