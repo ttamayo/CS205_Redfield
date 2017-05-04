@@ -15,7 +15,22 @@ The critical process of energy harvesting in solar cells is to quickly convert e
 
 Understanding the energy transfer in photosynthesis from the absorption of the photon to the charge separation is crucial for improving the efficiency of solar cells. However, experimental techniques for measuring the transfer of excited states are limited due to short time scales and tight packing of excitation sites. 
 
-Nevertheless the dynamics of excited states in protein complexes has been studied extensively in computer simulations. Several theoretical models at different levels exist to describe the exciton dynamics but even the simplest suitable models can only be applied to a relatively small number of excitonic sites (< 30) due to the computational scaling of the algorithms with the number of excitonic sites in the considered system. 
+<center>
+<img src="Graphics/FMO_in_bacterium.png" width="600">
+</center>
+
+**Figure:**
+Fenna-Matthews-Olson complex location inside of the photosystem of green sulfur bacteria. This photosynthetically active protein-pigment complex mediates the exciton transfer from the light harvesting chlorosomes to the reaction center. Goal of this project is to implement a fast method for computing how excited states are transferred across such complexes and to provide a tool to scan the space of excitonic systems to find candidate systems for improving the efficiency of solar cells. 
+
+
+
+The dynamics of excited states in protein complexes has been studied extensively in computer simulations. Several theoretical models at different levels exist to describe the exciton dynamics but even the simplest suitable models can only be applied to a relatively small number of excitonic sites (< 30) due to the computational scaling of the algorithms with the number of excitonic sites in the considered system. 
+
+
+<iframe src="https://player.vimeo.com/video/205391380" width="640" height="480" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+<p><a href="https://vimeo.com/205391380">Energy Transfer in LH2</a> from <a href="https://vimeo.com/dancespec">david glowacki</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
+
+**Movie** State of the art computation of excited state energy transfer in the photosystems on plants. Locations of excited states are indicated in blurry blue circles while the nuclei of the involed chlorophylls are depicted in stick representation. 
 
 In this project we focus on an implementation of the secular Redfield equation for exciton transfer and parallelize this method for computing the time evolution of an open quantum system. Using sophisticated programming models and combining them in hybrid implementations we hope to ease the curse of scalability for this particular problem and reach complex sizes beyond the currently accessible. 
 
