@@ -341,6 +341,48 @@ Based on running calculations for matrix sizes 16, 32, 48, and 64, we already se
 
 
 
+## <i class="fa fa-check-square" aria-hidden="true"></i>  Hybrid implementation: MPI and OpenAcc
+
+Finally, we explored an hybrid implementation to increase the speed up on the OpenAcc optimized version is using MPI.
+In a first implementation, we opted to use 2 nodes with 1 core and 1 GPU each, 
+to gain some intuition about the techinical challenges of programming and compiling MPI and OpenAcc.
+The goal on this approach is to compute on a different GPU to compute a term on the Lindblad equation by 
+parallelizing the computation of the different terms of the first summation
+(summ over <a href="https://www.codecogs.com/eqnedit.php?latex=m" target="_blank">) 
+on differnt GPUs and by reducing and updating the status of this term
+using MPI and OpenAcc.
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\sum\limits_{m}\sum\limits_{N,M}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\sum\limits_{m}\sum\limits_{N,M}&space;\gamma(\omega_{MN})&space;\left(&space;V_m(\omega_{MN})&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;-&space;\frac{1}{2}&space;V_m^\dagger(\omega_{MN})&space;V_m(\omega_{MN})&space;\rho(t)&space;-&space;\frac{1}{2}&space;\rho(t)&space;V^\dagger_m(\omega_{MN})&space;V_m(\omega_{MN})&space;\right&space;)" title="\sum\limits_{m}\sum\limits_{N,M} \gamma(\omega_{MN}) \left( V_m(\omega_{MN}) \rho(t) V^\dagger_m(\omega_{MN}) - \frac{1}{2} V_m^\dagger(\omega_{MN}) V_m(\omega_{MN}) \rho(t) - \frac{1}{2} \rho(t) V^\dagger_m(\omega_{MN}) V_m(\omega_{MN}) \right )" /></a>
+
+In this implemenation, we need to make sure that the matrices uses contigous sections in memory,
+therfore we needed to change the way the matrices are allocated:
+```
+double ***alloc_3d_double(int rows, int cols, int dept) {
+    double *data = (double *)malloc(rows*cols*dept*sizeof(double));
+    double **array= (double **)malloc(rows*dept*sizeof(double*));
+    double *** tensor = (double ***)malloc(dept*sizeof(double**));
+    for (int i=0; i<dept; i++){
+	tensor[i] = &(array[rows*i]);
+    	for (int j=0; j<rows; j++){
+        	tensor[i][j] = &(data[(rows*cols*i)+cols*j]);
+	}
+    }
+
+    return tensor;
+}
+```
+Finally, after the computation of part of the summation of the Lindblard term in a GPU using OpenACC, 
+these matrices are copied on their respective CPU and added and updated using
+the MPI function ```MPI_Allreduce```.
+
+```
+#pragma acc data copyout(lindblad_real[0:SIZE][0:SIZE])
+MPI_Allreduce(MPI_IN_PLACE, &(lindblad_real[0][0]),SIZE*SIZE, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+#pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
+```
+We expect some overheads on the computation
+due to this step.
+
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Conclusion
 
