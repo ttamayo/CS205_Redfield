@@ -1,0 +1,33 @@
+Routines for propagating an open quantum system according to the secular Redfield equations
+in nodes with a gpu
+
+Copile with mpi and open acc:
+	mpicc  *.c -lblas -llapack -lm -lpgftnrtl -lrt -Minfo=accel  -O2 -fast -acc  
+	
+	Maybe:
+
+	pgcc -acc *.c -lblas -llapack -lm -lpgftnrtl -lrt -Minfo=accel -ta=tesla,cc35 -Mmpi=mpich1
+	In Oddisey, it its not possible to load mpich1 without gcc, and it is not possible to have pgi  and gcc
+
+Environmental variables for running on odyssey
+	export PGI=/n/seasfs03/IACS/cs205/pgi
+	export PATH=$PGI/linux86-64/16.10/bin:$PATH
+	export MANPATH=$MANPATH:$PGI/linux86-64/16.10/man
+	export LM_LICENSE_FILE=$LM_LICENSE_FILE:$PGI/license.dat
+
+Modules for running in odyssey
+	module load pgi/14.10-fasrc01 openmpi/1.10.0-fasrc01 netcdf/4.1.3-fasrc05
+
+
+Notes in implementation MPI and OpenAcc:
+	- Use real matrices: https://gustedt.wordpress.com/2014/09/08/dont-use-fake-matrices/
+		The allocation should be an array with contigous memory
+	- Use enter data to copyin
+	- Don't use & in function with variables in GPUs
+	- Separate in different functions, the different kernels (I don't know if it has adverse results)
+	- Use SEND and RECV at least in a fisrt implementation, in C they contain an status variable to keep track of the success.
+
+To Do:
+	- Solve updates between different GPUs
+	- Solve updates for tensor with different lenghts of shapes
+	
