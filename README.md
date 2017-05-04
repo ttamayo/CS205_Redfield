@@ -38,7 +38,7 @@ where <a href="https://www.codecogs.com/eqnedit.php?latex=\gamma" target="_blank
 The first term of the differential equation for the density matrix accounts for the time evolution of the excitonic system alone while the second term is used to compute the influence of the environment on the dynamics of the excitonic system. 
 
 <center>
-<img src="Graphics/labeled_redfield_equation.png" width="500">
+<img src="Graphics/labeled_redfield_equation.png" width="600">
 </center>
 
 **Equation:** Redfield equation with labeled terms for evolution of system alone (blue) and interaction of system and environment (red).
@@ -54,7 +54,7 @@ In addition to the interaction between the excitonic sites and the interaction b
 
 A number of methods has been developed for computing the exciton dynamics of open quantum systems. The Aspuru-Guzik group at the Department of Chemistry and Chemical Biology has acquired some expertise on this topic and already developed some computational methods for computing the time evolution of excited states in such complexes. However, the so far implemented methods do not scale well beyond systems with more than 30 excitonic sites.
 
-Our goal is therefore to employ the Redfield method as a compromise of physical correctness and parallelizability to go beyond this limit and explore the space of large excited state systems. 
+Our goal is therefore to employ the Redfield method as a compromise of physical correctness and parallelizability to go beyond this limit and explore the space of large excited state systems over longer time scales (i.e. achieve full-scale simulations). 
 
 
 
@@ -113,11 +113,12 @@ We observed that a relatively cheap Euler integration scheme is too inaccurate a
 In the C implementation we hardcoded most of the operations to save on as many unnecessary operations as possible. The computation of the commutator, for instance, which would usually consist of two multiplications of comlex valued matrices could be reduced to two matrix vector multiplications by diagonalizing the Hamiltonian and setting the complex phase of the Hamiltonian to zero. This is demonstrated in the code listing below. 
 
 ```
-for (i = 0; i < SIZE; i++)
+for (i = 0; i < SIZE; i++) {
 	for (j = 0; j < SIZE; j++) {
 		comm_real[i][j] = (hamiltonian[j] - hamiltonian[i]) * rho_imag[i][j];
 		comm_imag[i][j] = (hamiltonian[i] - hamiltonian[j]) * rho_real[i][j];
 	}
+}
 ```
 
 We also precomputed the transition matrices <a href="https://www.codecogs.com/eqnedit.php?latex=V" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V" title="V" /></a> and implemented matrix transpose operations implictly by using the proper indexing in matrix multiplications. Furthermore we stored as many intermediate results as possible, such as the <a href="https://www.codecogs.com/eqnedit.php?latex=V^\dagger&space;V" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V^\dagger&space;V" title="V^\dagger V" /></a> term in the Lindblad operator, to avoid unnecessary computations. 
