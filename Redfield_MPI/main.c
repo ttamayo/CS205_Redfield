@@ -31,7 +31,7 @@
 
 #define NSITES 6			 // number of excitonic sites to be modeled
 #define dt 1.0				 // integration time step in fs
-#define number_of_steps 10   // number of integration time steps
+#define number_of_steps 1   // number of integration time steps
 #define BLOCK_SIZE 16        // size for blocked matrix operations
 
 #define TILE 16
@@ -378,7 +378,7 @@ double **alloc_2d_double(int rows, int cols) {
 double ***alloc_3d_double(int rows, int cols, int dept) {
     double *data = (double *)malloc(rows*cols*dept*sizeof(double));
     double **array= (double **)malloc(rows*dept*sizeof(double*));
-    double *** tensor = (double ***)malloc(dept*sizeof(double*));
+    double *** tensor = (double ***)malloc(dept*sizeof(double**));
     for (int i=0; i<dept; i++){
 	tensor[i] = &(array[rows*i]);
     	for (int j=0; j<rows; j++){
@@ -391,15 +391,15 @@ double ***alloc_3d_double(int rows, int cols, int dept) {
 
 double ****alloc_4d_double(int rows, int cols, int dept,int side) {
     double *data = (double *)malloc(rows*cols*dept*side*sizeof(double));
-    double **array= (double **)malloc(rows*dept*side*sizeof(double*));
-    double *** tensor = (double ***)malloc(dept*side*sizeof(double*));
-    double **** tensors = (double ***)malloc(side*sizeof(double*));
-    for (int k=0; k<cols; k++){
-	tensors[k] = &(tensor[dept*k]);
-	for (int i=0; i<dept; i++){
-		tensors[k][i] = &(array[(dept*cols*k)+cols*i]);
+    double **array= (double **)malloc(rows*dept*cols*sizeof(double*));
+    double *** tensor = (double ***)malloc(dept*rows*sizeof(double**));
+    double **** tensors = (double ****)malloc(rows*sizeof(double***));
+    for (int k=0; k<rows; k++){
+	tensors[k] = &(tensor[cols*k]);
+	for (int i=0; i<cols; i++){
+		tensors[k][i] = &(array[(dept*cols*k)+dept*i]);
     		for (int j=0; j<side; j++){
-        		tensors[k][i][j] = &(data[(rows*cols*side*k)+(rows*cols*i)+cols*j]);
+        		tensors[k][i][j] = &(data[(rows*cols*dept*k)+(rows*cols*i)+rows*j]);
 		}
 	}
     }
@@ -501,8 +501,8 @@ int main(int argc, char *argv[]) {
 	// ... storing transition matrices V
 	// ... storing intermediate results
 
-	double ****all_Vs;											// four dimensional array
-	all_Vs = alloc_4d_double(SIZE,SIZE,SIZE,SIZE);
+	double ****all_Vs[SIZE][SIZE][SIZE][3];											// four dimensional array
+	all_Vs = alloc_4d_double(SIZE,SIZE,SIZE,3);
 
 	double ***reduction_intermediates;							// three dimensional array
 	reduction_intermediates = alloc_3d_double(SIZE,SIZE,SIZE);
@@ -622,12 +622,14 @@ int main(int argc, char *argv[]) {
 	#pragma acc enter data copyin(reduction_intermediates[0:SIZE][0:SIZE][0:SIZE])
 	#pragma acc enter data copyin(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])
 	for (step = 0; step < number_of_steps; step++) {
-
-
-		get_density_update(rho_real, rho_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, &lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
-		#pragma acc update host(lindblad_real[0:SIZE][0:SIZE])
+		get_density_update(rho_real, rho_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
+		//#pragma acc update host(lindblad_real[0:SIZE][0:SIZE])
+		//#pragma acc update host(comm_real[0:SIZE][0:SIZE])
+		//#pragma acc data copyout(all_Vs[0][0:SIZE][0:SIZE][0])
+		#pragma acc data copyout(lindblad_real[0:SIZE][0:SIZE])
 		MPI_Allreduce(MPI_IN_PLACE, &(lindblad_real[0][0]),SIZE*SIZE, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		#pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
+        	print_matrix_real(lindblad_real,SIZE);
+		//#pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
         	
 		// ... compute k1 in blocked matrix operations
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE]) copyin(lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE]) present(rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k1_real[0:SIZE][0:SIZE], k1_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
@@ -655,9 +657,9 @@ int main(int argc, char *argv[]) {
 //		printf("getting k2\n");
 
 		get_density_update(h1_real, h1_imag, hamiltonian, comm_real, comm_imag, gammas, eigVects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, SIZE);
-		#pragma acc update host(lindblad_real[0:SIZE][0:SIZE])
-		MPI_Allreduce(MPI_IN_PLACE, &(lindblad_real[0][0]),SIZE*SIZE, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		#pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
+		//#pragma acc update host(lindblad_real[0:SIZE][0:SIZE])
+		//MPI_Allreduce(MPI_IN_PLACE, &(lindblad_real[0][0]),SIZE*SIZE, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		//#pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
                 
 		#pragma acc kernels present(comm_real[0:SIZE][0:SIZE], comm_imag[0:SIZE][0:SIZE], lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE], rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE])     present(k2_real[0:SIZE][0:SIZE], k2_imag[0:SIZE][0:SIZE], h1_real[0:SIZE][0:SIZE], h1_imag[0:SIZE][0:SIZE])
 		#pragma acc loop independent collapse(2)
@@ -723,12 +725,13 @@ int main(int argc, char *argv[]) {
 			}
 
 		#pragma acc update host(rho_real[0:SIZE][0:SIZE])
+        	print_matrix_real(rho_real,SIZE);
 
 
 		transpose(eigVects, SIZE);
 		rotate(rho_real, eigVects, SIZE);
 		rotate(rho_imag, eigVects, SIZE);
-		transpose(eigVects, SIZE);
+		transpose(eigVects, SIZE); 
 
 
 	}
@@ -740,6 +743,7 @@ int main(int argc, char *argv[]) {
         }
 
 
+    MPI_Finalize();
     // Analyze time elapsed
     //double time_spent = (double)(toc - tic) / CLOCKS_PER_SEC;
     //printf("# Time Elapsed: %f seconds\n\n", time_spent);

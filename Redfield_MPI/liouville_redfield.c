@@ -123,9 +123,7 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 
 	// iterate over intra-excitonic transitions (n^6 scaling)
 
-	//#pragma acc kernels  num_gangs(128)  num_workers(16)  vector_length(64)  present(gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], V[0:SIZE][0:SIZE][0:SIZE], first[0:SIZE][0:SIZE][0:SIZE], second[0:SIZE][0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE][0:SIZE],rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE], reduction_intermediates[0:SIZE][0:SIZE][0:SIZE]) present_or_copyin(lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
 	#pragma acc kernels  num_gangs(128)  num_workers(16)  vector_length(64)  present(all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], gammas[0:SIZE][0:SIZE][0:SIZE],V[0:SIZE][0:SIZE][0:SIZE],helper[0:SIZE][0:SIZE][0:SIZE],rho_real[0:SIZE][0:SIZE],first[0:SIZE][0:SIZE][0:SIZE],second[0:SIZE][0:SIZE][0:SIZE],reduction_intermediates[0:SIZE][0:SIZE][0:SIZE],lindblad_real[0:SIZE][0:SIZE])
-	//#pragma acc present(gammas[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], V[0:SIZE][0:SIZE][0:SIZE], first[0:SIZE][0:SIZE][0:SIZE], second[0:SIZE][0:SIZE][0:SIZE], helper[0:SIZE][0:SIZE][0:SIZE],rho_real[0:SIZE][0:SIZE], rho_imag[0:SIZE][0:SIZE], reduction_intermediates[0:SIZE][0:SIZE][0:SIZE]) present_or_copyin(lindblad_real[0:SIZE][0:SIZE], lindblad_imag[0:SIZE][0:SIZE])
  	// no parallelizat ion level left for this loop
  	#pragma acc loop
 	for (m = 1; m < SIZE - 1; m++) {
@@ -325,6 +323,7 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 		} // end of M loop 
 
 	} // end of m loop
+	} 
 
 	// so far we only computed intra-exciton transitions
 	// we still need loss transitions and target transitions
@@ -332,11 +331,19 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 
 	// calculations of these transition follow the same scheme as above
 	// except that we don't need to loop over M and N again (which is why we save n^2 here)
+	}
+
+void lindblad_operator_2(double **rho_real, double **rho_imag, double ***gammas, double **eigVects, double **lindblad_real, double **lindblad_imag, double *links_to_loss, double *links_to_target, double ****all_Vs, double ***V, double ***first, double ***second, double ***helper, double ***reduction_intermediates, int SIZE) {
+	// declare helper variables
+	int unsigned i, j, k, m, M, N;
+	int unsigned ii, jj, kk;
+	int unsigned index, jndex, kndex;
+	double rate, sum;	
+	double iupper, jupper;
 
 
 	// calculate loss and target transitions in one big kernel
-	/*
-	#pragma acc kernels   num_workers(16) vector_length(64)  present(V[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3])
+	#pragma acc kernels   num_workers(16) vector_length(64)  present(V[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], rho_real[0:SIZE][0:SIZE],helper[0:SIZE][0:SIZE][0:SIZE],first[0:SIZE][0:SIZE][0:SIZE], second[0:SIZE][0:SIZE][0:SIZE],lindblad_real[0:SIZE][0:SIZE])
 	//#pragma acc kernels   num_workers(16) vector_length(64)  present(helper[0:SIZE][0:SIZE][0:SIZE], first[0:SIZE][0:SIZE][0:SIZE], second[0:SIZE][0:SIZE][0:SIZE], V[0:SIZE][0:SIZE][0:SIZE], all_Vs[0:SIZE][0:SIZE][0:SIZE][0:3], rho_real[0:SIZE][0:SIZE], links_to_loss[0:SIZE], links_to_target[0:SIZE], lindblad_real[0:SIZE][0:SIZE])
 
 	//=//== getting the losses ===//
@@ -360,8 +367,6 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 					}
 				}
 			}
-	}
-/*
 	//--> start computing    V rho V^dagg    (first term of Lindblad operator)
 		// compute   V rho
 		// blocked matrix operation parallelized on the worker and vector level
@@ -385,6 +390,7 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 					}
 				}
 			}
+
 
 		// now compute   (V rho) V^dagg  with (V rho) stored in helper	
 		// blocked matrix operation parallelized on the worker and vector level
@@ -698,14 +704,15 @@ void lindblad_operator(double **rho_real, double **rho_imag, double ***gammas, d
 						jndex = jj + j;
 						if (index < SIZE && jndex < SIZE) {	
 							lindblad_real[index][jndex] += rate * (first[m][index][jndex] - second[m][index][jndex]);
+							//lindblad_real[index][jndex] += 1.0;
 						}
 					}
 				}
 			}
-*/
+
+	}
 
 
-	} 
 }
 
 
@@ -736,16 +743,9 @@ void get_density_update(double **rho_real, double **rho_imag, double *energies, 
 	// get the commutator
 	hamiltonian_commutator(rho_real, rho_imag, energies, comm_real, comm_imag, N);
 
-	// set lindblad result to zero
-	/*for (i = 0; i < N; i++) {
-		for (j = 0; j < N; j++) {
-			lindblad_real[i][j] = 0.;
-			lindblad_imag[i][j] = 0.;
-		}
-	}*/
-
 	// get lindblad
 	lindblad_operator(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, N);
+	lindblad_operator_2(rho_real, rho_imag, gammas, eigvects, lindblad_real, lindblad_imag, links_to_loss, links_to_target, all_Vs, V, first, second, helper, reduction_intermediates, N);
 	return;
 
 }
