@@ -12,6 +12,8 @@ MAIN COMPONENTS/DELIVERABLES
 
 5. `./LindbladTerm_OpenMP` ... Advanced feature (continued): A single iteration of the Lindblad term of the Redfield equations implemented in serial and parallel. 
 
+6. `./Redfield_MPI` ... A work version of an hybrid implementation of MPI + OpenACC.
+
 
 INSTRUCTIONS TO RUN MAIN/FINAL REDFIELD CODE
 --------------------------------------------
