@@ -276,7 +276,7 @@ For a more thorough investigation, we decided to take the OpenMP directives from
 
 **Figure:** Speedups from using OpenMP and blocking.
 
-Based on running calculations for matrix sizes 16, 32, 48, and 64, we already see significant speedups using OpenMP and blocking. We believe much of the speedups we observe are from the blocking implementation as these matrix sizes are too small to benefit from multithreading. According to the speedup plots, using more threads led to speedups but these were less than the speedups observed when using fewer threads.
+Based on running calculations for matrix sizes 16, 32, 48, and 64, we already see significant speedups (up to ~120x) using OpenMP and blocking. We believe much of the speedups we observe are from the blocking implementation as these matrix sizes are too small to benefit from multithreading. According to the speedup plots, using more threads led to speedups but these were less than the speedups observed when using fewer threads.
 
 
 
