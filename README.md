@@ -216,9 +216,9 @@ As displayed in the benchmark plot above we achieve significantly smaller runtim
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Advanced Feature #2: Stronger Scaling via OpenMP
 
-As observed from previous implementions, the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation. Thus, optimizing these matrix operations would help reduce the runtimes and improve scalability. 
+As observed from previous implementions, the bottleneck of the calculation was in the matrix-matrix multiplication operations in the Lindblad term of the Redfield equation (the red portion of the equation shown above). Thus, optimizing these matrix operations was expected to help reduce the runtimes and improve scalability. 
 
-We implemented matrix-matrix multiplication using blocking, shown to be robust for large matrix sizes, and OpenMP which supports shared memory multiprocessing programming. Below is the code listing for the blocked matrix-matrix multiplication implementation:
+Focusing on a single matrix-matrix multiplication, we implemented the operation using blocking, shown to be robust for large matrix sizes, and OpenMP which supports shared memory multiprocessing programming. Below is the code listing for the blocked matrix-matrix multiplication implementation:
 
 ```
 #pragma omp parallel for shared(A,B,C) private(i, j, ii, jj, k) schedule(auto) collapse(2) num_threads(8)
@@ -248,7 +248,7 @@ Using OpenMP, we "collapsed" or unrolled the two outer loops and tested differen
 <img src="Graphics/speedup_openmp.png" width="400">
 </center>
 
-**Figure:** Speedups of matrix-matrix multiplication using multiple threads. We can see that the use of 10 threads is better justified for larger system sizes.
+**Figure:** Speedups of matrix-matrix multiplication using multiple threads. We can see that the use of more threads is better justified for larger system sizes.
 
 
 <center>
@@ -258,10 +258,11 @@ Using OpenMP, we "collapsed" or unrolled the two outer loops and tested differen
 **Figure:** Scaling of matrix-matrix multiplication using multiple threads. Though not very close to the ideal curve, generally, adding more threads led to better scaling.
 
 
-Above are performance plots from testing out various matrix sizes with different number of threads. Generally, we note that a greater number of threads led to faster runtimes and better scaling. However, simply adding more threads does not lead to favorable performance due to overheads. Thus, one should check that the matrix size is large enough such that the use of more threads is effective.
+Generally, we noted that using a greater number of threads led to faster runtimes and better scaling. However, simply adding more threads did not lead to favorable performance due to overheads. Therefore, one must check that the matrix size is large enough such that the use of more threads is effective.
 
 
-For a more thorough investigation, we decided to take the matrix-matrix multiplication implementation above and run a single iteration of the Lindblad term (recall that this is the second term of the Redfield equations that involve many matrix operations), which was shown to be the bottleneck of the overall computation. This single iteration still involved 15*N^3 matrix-matrix multiplication operations, and we hoped to observe significant speedups using OpenMP and blocking.
+
+For a more thorough investigation, we decided to take the OpenMP directives from the single matrix-matrix multiplication implementation and run a single iteration of the Lindblad term (again, recall that this is the second term of the Redfield equations that involve many matrix operations). This single iteration still involved 15*N^3 matrix-matrix multiplication operations, and we hoped to observe significant speedups using OpenMP and blocking.
 
 <center>
 <img src="Graphics/runtimes_singleLindblad.png" width="400">
