@@ -5,11 +5,15 @@ Copile with mpi and open acc:
 ```
 	mpicc  *.c -lblas -llapack -lm -lpgftnrtl -lrt -Minfo=accel  -O2 -fast -acc  
 ```	
+
 	Maybe:
+
 ```
 	pgcc -acc *.c -lblas -llapack -lm -lpgftnrtl -lrt -Minfo=accel -ta=tesla,cc35 -Mmpi=mpich1
 ```
+
 Environmental variables for running on odyssey
+
 ```
 	export PGI=/n/seasfs03/IACS/cs205/pgi
 	export PATH=$PGI/linux86-64/16.10/bin:$PATH
