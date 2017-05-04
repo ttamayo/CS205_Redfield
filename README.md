@@ -125,6 +125,12 @@ We also precomputed the transition matrices <a href="https://www.codecogs.com/eq
 
 However, due to the inaccurate Euler integration we were also forced to go to a 4th order Runge-Kutta integrator to maintain a reasonable level of accuracy in our calculations (4th order vs. Euler's 1st order). The 4th order Runge-Kutta integrator requires the calculation of four density matrix updated per integration step, but this additional computational cost was compensated by the implemented optimizations. The figure below shows the behavior of the 4th order Runge-Kutta integrator over time. We observe, as expected, that the peak height of the initial site is preserved during the simulation. 
 
+<center>
+<img src="Graphics/euler_vs_rungekutta.png" width="400">
+</center>
+
+**Figure:** This table highlights the difference between the Euler and Runge-Kutta 4 methods. While easy to implement, the forward-mode Euler method used for this calculation has first order accuracy. On the other hand, the 4th order Runge Kutta takes more effort (from the programmer's point of view but also in terms of computational time and memory as these k's need to be computed and stored).
+
 
 <center>
 <img src="Graphics/RungeKutta_test.png" width="400">
