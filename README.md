@@ -373,16 +373,39 @@ the MPI function ```MPI_Allreduce```.
 MPI_Allreduce(MPI_IN_PLACE, &(lindblad_real[0][0]),SIZE*SIZE, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #pragma acc update device(lindblad_real[0:SIZE][0:SIZE])
 ```
-We expect some overheads on the computation
-due to this step and speed ups up to the numbers of GPUs we use. 
+It is expected some overheads on the computation
+due to this step and speed ups up to the numbers of GPUs we use. To test this assumption, with 2 nodes and 2 GPUs, given that
+we run this implementation on Oddisey and it has some contrains. We found the following preliminary results:
+<center>
+<img src="Graphics/runtimes_MPI_OpenACC_aag.png" width="400">
+</center>
+**Figure:** Runtimes of 100 iterations in the Runge-Kutta integration scheme for excitonic systems of different sizes. The results are run times with one and two nodes with one GPU. Simulations were run on a NVIDIA Tesla K40 GPU. 
 
-The main potential advantage of using more GPUs is memory that we will require in each of them, because we can copy from the CPU host to the device,
+<center>
+<img src="Graphics/runtimes_MPI_OpenACC_seas.png" width="400">
+</center>
+**Figure:** Runtimes of 100 iterations in the Runge-Kutta integration scheme for excitonic systems of different sizes. The results are run times with one and two nodes with one GPU. Simulations were run on a NVIDIA Tesla K40.
+<center>
+<img src="Graphics/speedup_singleLindblad_ration.png" width="400">
+</center>
+**Figure:** Ratio of speed ups of two nodes compared with one node of 100 iterations in the Runge-Kutta integration scheme for excitonic systems of different sizes. The results are run times with one and two nodes with one GPU. Simulations were run on a NVIDIA Tesla K80 GPU.
+
+In the first plot we can see that the communication and summation in CPUs might be more time consumming 
+than the speed ups of the actual computation 
+running on 2 NVIDIA Tesla K80 GPUs, because the original OpenACC code was optimized for this architecture. 
+This agrees with the result of the second and third plot, where we used two GPUs NVIDIA Tesla K40m. Finally, we can see, that
+in some architectures, we can have more speed-ups using more codes. Further test on different architectures and with different numbers
+of nodes should be performed to have a conclusive tendency of the speed-ups.
+
+The main potential advantage of using more GPUs is the memory that we will require in each of them, 
+because we can copy from the CPU host to the GPU
 just sections of the most memory intensive variables, the V matrices stored in a tensor of rank 3 (<a href="https://www.codecogs.com/eqnedit.php?latex=N^6" target="_blank"><img src="https://latex.codecogs.com/gif.latex?N^6" title="N^3" /></a>) and two precomputed matrices of the same size. 
 
 
 ## <i class="fa fa-check-square" aria-hidden="true"></i>  Conclusion
 
-We were able to implement and parallelize the Redfield equations using various methods including algorithm optimization, use of low-level language, and uses of various parallelization models. Currently, our Redfield code can work well for relatively small Hamiltonian sizes, but further optimizations including effective use of OpenMP for stronger scaling may eventually allow us to run the entire calculation for much larger systems for longer time scales.
+We were able to implement and parallelize the Redfield equations using various methods including algorithm optimization, use of low-level language, and uses of various parallelization models. Currently, our Redfield code can work well for relatively small Hamiltonian sizes, but further optimizations including effective use of OpenMP for stronger scaling may eventually allow us to run the entire calculation for much larger systems for longer time scales. And further optimizations and tests on the hybrid code should be done to reach bigger systems,
+taking into advantage memory contrains of using just one GPU.
 
 
 
