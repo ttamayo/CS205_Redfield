@@ -386,7 +386,7 @@ we run this implementation on Oddisey and it has some contrains. We found the fo
 </center>
 **Figure:** Runtimes of 100 iterations in the Runge-Kutta integration scheme for excitonic systems of different sizes. The results are run times with one and two nodes with one GPU. Simulations were run on a NVIDIA Tesla K40.
 <center>
-<img src="Graphics/speedup_singleLindblad_ration.png" width="400">
+<img src="Graphics/runtimes_MPI_OpenACC_ration.png" width="400">
 </center>
 **Figure:** Ratio of speed ups of two nodes compared with one node of 100 iterations in the Runge-Kutta integration scheme for excitonic systems of different sizes. The results are run times with one and two nodes with one GPU. Simulations were run on a NVIDIA Tesla K80 GPU.
 
