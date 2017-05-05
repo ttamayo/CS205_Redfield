@@ -394,8 +394,8 @@ In the first plot we can see that the communication and summation in CPUs might 
 than the speed ups of the actual computation 
 running on 2 NVIDIA Tesla K80 GPUs, because the original OpenACC code was optimized for this architecture. 
 This agrees with the result of the second and third plot, where we used two GPUs NVIDIA Tesla K40m. Finally, we can see, that
-in some architectures, we can have more speed-ups using more codes. Further test on different architectures and with different numbers
-of nodes should be performed to have a conclusive tendency of the speed-ups.
+in some architectures, we can have more speed ups using two cores. Further tests on different architectures and with different numbers
+of nodes should be performed to have a conclusive tendency of the speed ups.
 
 The main potential advantage of using more GPUs is the memory that we will require in each of them, 
 because we can copy from the CPU host to the GPU
